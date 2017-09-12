@@ -38,12 +38,25 @@ class Bitbucket:
         self.data = json.loads(resp.text)
         return self.data
 
-    def GetBranchesTest(self, projectkey, reponame):
-        url = "%s/projects/%s/repos/%s/branches" % (self.base_url, projectkey, reponame)
+# Получить список PR
+    def GetPullRequests(self, projectkey, reponame, branchid, state):
+        url = "%s/projects/%s/repos/%s/pull-requests" % (self.base_url, projectkey, reponame)
         parameters = dict(
-            details='true',
-            filterText='feature/DIRI523-1690'
+            direction='OUTGOING',
+            at=branchid,
+            state=state
         )
+        resp = requests.get(url, auth=self.auth, params=parameters)
+        self.data = json.loads(resp.text)
+        return self.data
+
+# Сравнение веток
+    def CompareCommits(self, projectkey, reponame, frombranchid, tobranchid):
+        url = "%s/projects/%s/repos/%s/compare/commits" % (self.base_url, projectkey, reponame)
+        parameters = {
+            'from': frombranchid,
+            'to': tobranchid
+        }
         resp = requests.get(url, auth=self.auth, params=parameters)
         self.data = json.loads(resp.text)
         return self.data
