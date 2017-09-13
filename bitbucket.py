@@ -19,8 +19,8 @@ class Bitbucket:
         return self.data
 
 # Получить список репозиториев в проекте	
-    def GetRepositories(self, projectname):
-        url = "%s/repos" % self.base_url
+    def GetRepositories(self, projectkey):
+        url = "%s/projects/%s/repos" % (self.base_url, projectkey)
         parameters = dict(
             projectname=projectname
         )
@@ -32,7 +32,8 @@ class Bitbucket:
     def GetBranches(self, projectkey, reponame):
         url = "%s/projects/%s/repos/%s/branches" % (self.base_url, projectkey, reponame)
         parameters = dict(
-            details='true'
+            details='true',
+            limit=400
         )
         resp = requests.get(url, auth=self.auth, params=parameters)
         self.data = json.loads(resp.text)

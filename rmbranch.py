@@ -18,12 +18,12 @@ def logger(message):
     f.close
 
 # Проверка корректности имени
-def check_branch_name(branch):
-    if len(branch_template.findall(branch['displayId'])) == 1:
-        task_id = "DIRI%s-%s" % (branch_template.findall(branch['displayId'])[0][1], branch_template.findall(branch['displayId'])[0][2])
+def check_branch_name(project, repo, branch):
+    if len(branch_template.findall(branch)) == 1:
+        task_id = "DIRI%s-%s" % (branch_template.findall(branch)[0][1], branch_template.findall(branch)[0][2])
         return task_id
     else:
-        logger("%s %s %s Branch name is not valid" % (project['name'], repo['name'], branch['displayId']))
+        logger("%s %s %s Branch name is not valid" % (project, repo, branch))
         return 0
 
 # Проверка статуса задачи
@@ -35,13 +35,12 @@ def check_task_status(task):
 
 
 # Проверка смержена ли ветка
-def check_branch_merge(project, repo, branch):
+def check_branch_merge(bb, project, repo, branch):
     if len(branch_template.findall(branch['displayId'])) == 1:
         task_id = "DIRI%s-%s" % (branch_template.findall(branch['displayId'])[0][1], branch_template.findall(branch['displayId'])[0][2])
     else:
         logger("%s %s %s Branch name is not valid" % (project['name'], repo['name'], branch['displayId']))
         return -1
-    print(branch)
     if branch['metadata'].get('com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'):
         if branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'].get('pullRequest'):
             if branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['state'] == "MERGED":
@@ -92,7 +91,7 @@ def main():
             continue
 
         print(project['key'], project['name'])
-        repos = bb.GetRepositories(project['name'])
+        repos = bb.GetRepositories(project['key'])
 
         for repo in repos['values']:
             if repo['name'].encode('utf8') in config.exclude_repo:
@@ -104,9 +103,9 @@ def main():
             for branch in branches['values']:
                 if branch['displayId'] in config.exclude_branches:
                     continue
-                task = check_branch_name(branch)
+                task = check_branch_name(project['name'], repo['name'], branch['displayId'])
                 if task:
-                    branch_size = check_branch_merge(project, repo, branch)
+                    branch_size = check_branch_merge(bb, project, repo, branch)
                     if branch_size == "0":
                         task_status == check_task_status(task)
 

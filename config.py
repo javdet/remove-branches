@@ -9,6 +9,16 @@ BASE_URL_JIRA = "https://plan.itmh.local/rest/api/2"
 USER_JIRA = "service_atlas_assist"
 PASS_JIRA = "HDgbf67sgwk"
 
+MAIL = {
+  fromaddr: "stash.itmh.ru",
+  server: "mail.sis.mirasystem.net",
+  dir525: "DIR.I5.2.5.users@itmh.ru",
+  dir521: "DIR.I5.2.1.users@itmh.ru",
+  dir522: "DIR.I5.2.2.users@itmh.ru",
+  dir523: "DIR.I5.2.3.users@itmh.ru",
+  test: "byvshev.sergey@itmh.ru"
+}
+
 LOG_FILE = "/home/byvshev/rmbranch/rmbranch.log"
 
 exclude_projects = [
