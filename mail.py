@@ -18,7 +18,7 @@ class Mail:
             self.msg['Subject'] = "Список веток для удаления"
         elif msg_type == "check":
             self.msg['Subject'] = "Список веток для проверки"
-        elif msg_type == "incorrect_name":
+        elif msg_type == "invalid_name":
             self.msg['Subject'] = "Список веток с некорректным имененм"
         
         self.msg['To'] = toaddr
@@ -52,17 +52,15 @@ background-color: #D3D3D3;
 """ % (self.msg['Subject'], content)
         part = MIMEText(body.decode('cp1251'), 'html', 'cp1251')
         self.msg.attach(part)
-        self.smtp.sendmail(self.msg['From'], self.msg['To'], msg.as_string())
-
-# Форматирование данных
-    def Preparing(project, repo, branch):
-        content = """
-<tr>
-<td>%s</td>
-<td>%s</td>
-<td>%s</td>
-""" % (project, repo, branch)
-        return content
+        self.smtp.set_debuglevel(1)
+        try:
+            self.smtp.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
+        except SMTPRecipientsRefused:
+            return -1
+        except MTPSenderRefused:
+            return -2
+        except SMTPDataError:
+            return -3
 
     def close():
         self.smtp.quit()
