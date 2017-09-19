@@ -16,10 +16,13 @@ class Mail:
     def Send(self, msg_type, toaddr, content):
         if msg_type == "delete":
             self.msg['Subject'] = "Список веток для удаления"
+            message = "Ветки, которые будут удалены автоматически"
         elif msg_type == "check":
             self.msg['Subject'] = "Список веток для проверки"
+            message = "Просьба проверить нужны ли ветки и при необходимости удалить"
         elif msg_type == "invalid_name":
             self.msg['Subject'] = "Список веток с некорректным имененм"
+            message = "Следующие ветки имеют некорректное название"
         
         self.msg['To'] = toaddr
         body = """
@@ -39,6 +42,7 @@ background-color: #D3D3D3;
 </style>
 </head>
 <body>
+%s
 <table>
 <tr>
 <th>Проект</th>
@@ -49,10 +53,9 @@ background-color: #D3D3D3;
 </table>
 </body>
 </html>
-""" % (self.msg['Subject'], content)
-        part = MIMEText(body.decode('cp1251'), 'html', 'cp1251')
+""" % (self.msg['Subject'], message, content)
+        part = MIMEText(body, 'html')
         self.msg.attach(part)
-        self.smtp.set_debuglevel(1)
         try:
             self.smtp.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
         except SMTPRecipientsRefused:
@@ -62,5 +65,10 @@ background-color: #D3D3D3;
         except SMTPDataError:
             return -3
 
-    def close():
+    def SendTest(self, toaddr, content):
+        self.msg['Subject'] = "Список веток для удаления"
+        self.msg['To'] = toaddr
+        self.smtp.sendmail(self.msg['From'], self.msg['To'], content)
+
+    def close(self):
         self.smtp.quit()

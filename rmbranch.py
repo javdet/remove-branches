@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import argparse
 import config
 import re
 from datetime import datetime
@@ -16,7 +15,7 @@ branch_template = re.compile("^(.*)/DIRI(\w+)-(\d+)$")
 def logger(message):
     date = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
     f = open(config.LOG_FILE, 'a')
-    f.write(date+" "+message+"\n")
+    f.write(date+" "+message.encode('utf-8')+"\n")
     f.close
 
 # Проверка корректности имени
@@ -25,12 +24,7 @@ def check_branch_name(project, repo, branch):
         task_id = "DIRI%s-%s" % (branch_template.findall(branch)[0][1], branch_template.findall(branch)[0][2])
         return task_id
     else:
-        message = " ".join(
-                          (project,
-                          repo,
-                          branch,
-                          "Branch name is not valid")
-        ).encode('utf-8')
+        message = "%s %s %s Branch name is not valid" % (project, repo, branch)
         logger(message)
         return 0
 
@@ -39,11 +33,7 @@ def check_task_status(task):
     jira = Jira(config.BASE_URL_JIRA, config.USER_JIRA, config.PASS_JIRA)
     issue = jira.GetIssue(task)
     if issue.get('errorMessages'):
-        message = " ".join(
-                          (task,
-                          "Error: ",
-                          str(issue['errorMessages']))
-        ).encode('utf-8')
+        message = "%s Error: %s" % (task, str(issue['errorMessages']))
         logger(message)
         return -1
     else:
@@ -59,6 +49,7 @@ def preparing(project, repo, branch):
 <td>%s</td>
 <td>%s</td>
 <td>%s</td>
+</tr>
 """ % (project, repo, branch)
     return content
 
@@ -67,56 +58,44 @@ def check_branch_merge(bb, project, repo, branch):
     if branch['metadata'].get('com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'):
         if branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'].get('pullRequest'):
             if branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['state'] == "MERGED":
-                print(branch['displayId'], 
-                    branch['id'], 
-                    branch['latestCommit'], 
-                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:ahead-behind-metadata-provider']['ahead'],
-                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['state'],
-                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['toRef']['displayId'],
-                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['toRef']['id']
-                )
+#                print(branch['displayId'], 
+#                    branch['id'], 
+#                    branch['latestCommit'], 
+#                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:ahead-behind-metadata-provider']['ahead'],
+#                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['state'],
+#                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['toRef']['displayId'],
+#                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['toRef']['id']
+#                )
                 compare = bb.CompareCommits(project['key'], 
                             repo['name'], 
                             branch['id'], 
                             branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['toRef']['id']
                 )
                 if compare.get('errors'):
-                    message = " ".join(
-                                      (project['name'], 
-                                      repo['name'], 
-                                      branch['displayId'], 
-                                      "Error: ", 
-                                      compare['errors'][0]['message'])
-                    ).encode('utf-8')
+                    message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], compare['errors'][0]['message'])
                     logger(message)
                     return -1
-                print(compare)
+#                print(compare)
                 return(compare['size'])
         elif branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['merged']:
             pr = bb.GetPullRequests(project['key'], repo['name'], branch['id'], 'MERGED')
-            print(branch['id'], pr)
-            print(branch['displayId'], 
-                branch['id'], 
-                branch['latestCommit'], 
-                branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:ahead-behind-metadata-provider']['ahead'],
-                pr['values'][0]['toRef']['id']
-            )
+#            print(branch['id'], pr)
+#            print(branch['displayId'], 
+#                branch['id'], 
+#                branch['latestCommit'], 
+#                branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:ahead-behind-metadata-provider']['ahead'],
+#                pr['values'][0]['toRef']['id']
+#            )
             compare = bb.CompareCommits(project['key'], 
                         repo['name'], 
                         branch['id'], 
                         pr['values'][0]['toRef']['id']
             )
             if compare.get('errors'):
-                message = " ".join(
-                                 (project['name'], 
-                                  repo['name'], 
-                                  branch['displayId'], 
-                                  "Error: ", 
-                                  compare['errors'][0]['message'])
-                ).encode('utf-8')
+                message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], compare['errors'][0]['message'])
                 logger(message)
                 return -1
-            print(compare)
+#            print(compare)
             return(compare['size'])
     else:
         return -2
@@ -154,28 +133,38 @@ def main():
                     if branch_size == 0:
                         task_status = check_task_status(task)
                         if task_status:
-                            print("Delete", project['name'], repo['name'], branch['displayId'])
+                            if config.NOTIFY:
+                                bb.DeleteBranch(project['key'], repo['name'], branch['displayId'])
                             msg_delete = msg_delete + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                     elif branch_size == -1:
                         print("Not dest branch", project['name'], repo['name'], branch['displayId'])
                     elif branch_size > 0 or branch_size == -2:
-                        print(branch)
-                        tdiff = datetime.now() - datetime.fromtimestamp(int(str(branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:latest-commit-metadata']['authorTimestamp'])[0:10]))
+                        try:
+                            tdiff = datetime.now() - datetime.fromtimestamp(int(str(branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:latest-commit-metadata']['authorTimestamp'])[0:10]))
+                        except KeyError, e:
+                            message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], str(e))
+                            logger(message)
+                            continue
                         if tdiff.days > 30:
                             msg_check = msg_check + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
-                            
-                        print("Difference is %d days %d hours" % (tdiff.days, tdiff.seconds/3600))
+#                        print("Difference is %d days %d hours" % (tdiff.days, tdiff.seconds/3600))
                 else:
                    msg_invalidname = msg_invalidname + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
 
-    smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
     # Информирование о невалидных именах
+    smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
     smtp.Send("invalid_name", config.MAIL['test'], msg_invalidname)
-    # Информирование о ветках к удалению
-    smtp.Send("delete", config.MAIL['test'], msg_delete)
-    # Информирование о старых ветках
-    smtp.Send("check", config.MAIL['test'], msg_check)
+    smtp.close()
 
+    # Информирование о ветках к удалению
+    smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
+    smtp.Send("delete", config.MAIL['test'], msg_delete)
+    smtp.close()
+    
+    # Информирование о старых ветках
+    smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
+    smtp.Send("check", config.MAIL['test'], msg_check)
+    smtp.close()
     logger("Stop")
 
 if __name__ == "__main__": 
