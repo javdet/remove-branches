@@ -25,8 +25,6 @@ def check_branch_name(project, repo, branch):
         task_id = "DIRI%s-%s" % (branch_template.findall(branch)[0][1], branch_template.findall(branch)[0][2])
         return task_id
     else:
-        message = "%s %s %s Branch name is not valid" % (project, repo, branch)
-        logger(message)
         return 0
 
 # Получение имени отдела
@@ -156,34 +154,44 @@ def main():
                 task = check_branch_name(project['name'], repo['name'], branch['displayId'])
                 if task:
                     branch_size = check_branch_merge(bb, project, repo, branch)
+                    division = get_division(branch['displayId'])
+
+# Нет изменений относительно ветки назначения
                     if branch_size == 0:
                         task_status = check_task_status(task)
                         if task_status:
                             if config.TODELETE:
                                 bb.DeleteBranch(project['key'], repo['name'], branch['displayId'])
                             msg_delete = msg_delete + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
-                            division = get_division(branch['displayId'])
                             try:
                                 branch_list_delete[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                             except KeyError:
                                 branch_list_delete[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+
+# Не удалось сравнить изменения
                     elif branch_size == -1:
-                        print("Not dest branch", project['name'], repo['name'], branch['displayId'])
+                        try:
+                            branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                        except KeyError:
+                            branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+
+# Изменения есть или не было мержа
                     elif branch_size > 0 or branch_size == -2:
                         try:
                             tdiff = datetime.now() - datetime.fromtimestamp(int(str(branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:latest-commit-metadata']['authorTimestamp'])[0:10]))
                         except KeyError, e:
-                            message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], str(e))
+                            message = "%s %s %s Key Error: %s" % (project['name'], repo['name'], branch['displayId'], str(e))
                             logger(message)
                             continue
                         if tdiff.days > 30:
-                            msg_check = msg_check + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
-                            division = get_division(branch['displayId'])
-                            try:
-                                branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
-                            except KeyError:
-                                branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
-#                        print("Difference is %d days %d hours" % (tdiff.days, tdiff.seconds/3600))
+                            task_status = check_task_status(task)
+                            if task_status:
+                                msg_check = msg_check + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                                try:
+                                    branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                                except KeyError:
+                                    branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+#                           print("Difference is %d days %d hours" % (tdiff.days, tdiff.seconds/3600))
                 else:
                    msg_invalidname = msg_invalidname + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                    division = get_division(branch['displayId'])
