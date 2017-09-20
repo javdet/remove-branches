@@ -162,6 +162,8 @@ def main():
                         if task_status:
                             if config.TODELETE:
                                 bb.DeleteBranch(project['key'], repo['name'], branch['displayId'])
+                                message = "%s %s %s Branch delete" % (project['name'], repo['name'], branch['displayId'])
+                                logger(message)
                             msg_delete = msg_delete + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                             try:
                                 branch_list_delete[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
@@ -203,8 +205,9 @@ def main():
     # Информирование о невалидных именах
     send_mail("invalid_name", branch_list_invalidname)
 
-    # Информирование о ветках к удалению
-    send_mail("delete", branch_list_delete)
+    if not config.TODELETE:
+        # Информирование о ветках к удалению
+        send_mail("delete", branch_list_delete)
     
     # Информирование о старых ветках
     send_mail("check", branch_list_check)
