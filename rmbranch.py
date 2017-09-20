@@ -10,6 +10,7 @@ from jira import Jira
 from mail import Mail
 
 branch_template = re.compile("^(.*)/DIRI(\w+)-(\d+)$")
+division_template = re.compile("^(.*)/DIRI(\d+)-(\d+)$")
 
 # Логирование
 def logger(message):
@@ -27,6 +28,13 @@ def check_branch_name(project, repo, branch):
         message = "%s %s %s Branch name is not valid" % (project, repo, branch)
         logger(message)
         return 0
+
+# Получение имени отдела
+def get_division(branch):
+    if len(division_template.findall(branch)) == 1:
+        return "DIRI%s" % division_template.findall(branch)[0][1]
+    else:
+        return "DIRI525"
 
 # Проверка статуса задачи
 def check_task_status(task):
@@ -52,6 +60,20 @@ def preparing(project, repo, branch):
 </tr>
 """ % (project, repo, branch)
     return content
+
+# Рассылка сообщений
+def send_mail(msg_type, msg):
+    for key, value in msg.items():
+        smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
+        if key == "DIRI525":
+            smtp.Send(msg_type, config.MAIL[key], value, key.encode('utf-8'))
+        elif key in config.MAIL:
+            smtp.Send(msg_type, "%s, %s" % (config.MAIL[key], config.MAIL['DIRI525']), value, key.encode('utf-8'))
+        else:
+            message = "No RCPT mail KEY %s" % key
+            logger(message)
+        smtp.close()
+
 
 # Проверка смержена ли ветка
 def check_branch_merge(bb, project, repo, branch):
@@ -110,6 +132,10 @@ def main():
     msg_delete = ""
     msg_check = ""
 
+    branch_list_invalidname = {}
+    branch_list_delete = {}
+    branch_list_check = {}
+
     for project in projects['values']:
         if project['name'].encode('utf8') in config.exclude_projects:
             continue
@@ -133,9 +159,14 @@ def main():
                     if branch_size == 0:
                         task_status = check_task_status(task)
                         if task_status:
-                            if config.NOTIFY:
+                            if config.TODELETE:
                                 bb.DeleteBranch(project['key'], repo['name'], branch['displayId'])
                             msg_delete = msg_delete + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                            division = get_division(branch['displayId'])
+                            try:
+                                branch_list_delete[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                            except KeyError:
+                                branch_list_delete[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                     elif branch_size == -1:
                         print("Not dest branch", project['name'], repo['name'], branch['displayId'])
                     elif branch_size > 0 or branch_size == -2:
@@ -147,24 +178,28 @@ def main():
                             continue
                         if tdiff.days > 30:
                             msg_check = msg_check + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                            division = get_division(branch['displayId'])
+                            try:
+                                branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                            except KeyError:
+                                branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
 #                        print("Difference is %d days %d hours" % (tdiff.days, tdiff.seconds/3600))
                 else:
                    msg_invalidname = msg_invalidname + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                   division = get_division(branch['displayId'])
+                   try:
+                       branch_list_invalidname[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                   except KeyError:
+                       branch_list_invalidname[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
 
     # Информирование о невалидных именах
-    smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
-    smtp.Send("invalid_name", config.MAIL['test'], msg_invalidname)
-    smtp.close()
+    send_mail("invalid_name", branch_list_invalidname)
 
     # Информирование о ветках к удалению
-    smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
-    smtp.Send("delete", config.MAIL['test'], msg_delete)
-    smtp.close()
+    send_mail("delete", branch_list_delete)
     
     # Информирование о старых ветках
-    smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
-    smtp.Send("check", config.MAIL['test'], msg_check)
-    smtp.close()
+    send_mail("check", branch_list_check)
     logger("Stop")
 
 if __name__ == "__main__": 

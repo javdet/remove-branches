@@ -13,16 +13,16 @@ class Mail:
         self.msg['From'] = fromaddr
 
 # Отправка сообщения
-    def Send(self, msg_type, toaddr, content):
+    def Send(self, msg_type, toaddr, content, division):
         if msg_type == "delete":
-            self.msg['Subject'] = "Список веток для удаления"
+            self.msg['Subject'] = "Список веток для удаления %s" % division
             message = "Ветки, которые будут удалены автоматически"
         elif msg_type == "check":
-            self.msg['Subject'] = "Список веток для проверки"
-            message = "Просьба проверить нужны ли ветки и при необходимости удалить"
+            self.msg['Subject'] = "Список веток для проверки %s" % division
+            message = "Просьба проверить нужны ли ветки и при необходимости удалить" 
         elif msg_type == "invalid_name":
-            self.msg['Subject'] = "Список веток с некорректным имененм"
-            message = "Следующие ветки имеют некорректное название"
+            self.msg['Subject'] = "Список веток с некорректным имененем %s" % division
+            message = "Следующие ветки имеют некорректное название" 
         
         self.msg['To'] = toaddr
         body = """
@@ -54,7 +54,7 @@ background-color: #D3D3D3;
 </body>
 </html>
 """ % (self.msg['Subject'], message, content)
-        part = MIMEText(body, 'html')
+        part = MIMEText(body, 'html', 'utf-8')
         self.msg.attach(part)
         try:
             self.smtp.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())

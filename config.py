@@ -9,18 +9,32 @@ BASE_URL_JIRA = "https://plan.itmh.local/rest/api/2"
 USER_JIRA = "service_atlas_assist"
 PASS_JIRA = "HDgbf67sgwk"
 
-# 1 - только оповещать, 0 - удалять
-NOTIFY = 0
+# 1 - удалять, 0 - только оповещать
+TODELETE = 0
+
+#MAIL = {
+#  "fromaddr": "noreply@stash.itmh.ru",
+#  "smtp": "mail.sis.mirasystem.net",
+#  "DIRI52": "DIR.I5.2.users@itmh.ru",
+#  "DIRI525": "DIR.I5.2.5.users@itmh.ru",
+#  "DIRI521": "DIR.I5.2.1.users@itmh.ru",
+#  "DIRI522": "DIR.I5.2.2.users@itmh.ru",
+#  "DIRI523": "DIR.I5.2.3.users@itmh.ru",
+#  "DIRI54": "DIR.I5.4.users@itmh.ru",
+#  "DIRI532": "DIR.I5.3.2.users@itmh.ru",
+#  "test": "byvshev.sergey@itmh.ru"
+#}
 
 MAIL = {
   "fromaddr": "noreply@stash.itmh.ru",
   "smtp": "mail.sis.mirasystem.net",
+  "DIRI52": "byvshev.sergey@itmh.ru",
   "DIRI525": "DIR.I5.2.5.users@itmh.ru",
-  "DIRI521": "DIR.I5.2.1.users@itmh.ru",
-  "DIRI522": "DIR.I5.2.2.users@itmh.ru",
-  "DIRI523": "DIR.I5.2.3.users@itmh.ru",
-  "DIRI54": "DIR.I5.4.users@itmh.ru",
-  "DIRI532": "DIR.I5.3.2.users@itmh.ru",
+  "DIRI521": "byvshev.sergey@itmh.ru",
+  "DIRI522": "byvshev.sergey@itmh.ru",
+  "DIRI523": "byvshev.sergey@itmh.ru",
+  "DIRI54": "byvshev.sergey@itmh.ru",
+  "DIRI532": "byvshev.sergey@itmh.ru",
   "test": "byvshev.sergey@itmh.ru"
 }
 
