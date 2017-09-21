@@ -126,14 +126,10 @@ def main():
     bb = Bitbucket(config.BASE_URL_BITBUCKET, config.USER_BITBUCKET, config.PASS_BITBUCKET)
     projects = bb.GetProjects()
 
-    msg_invalidname = ""
-    msg_delete = ""
-    msg_check = ""
-
     branch_list_invalidname = {}
     branch_list_delete = {}
     branch_list_check = {}
-
+    
     for project in projects['values']:
         if project['name'].encode('utf8') in config.exclude_projects:
             continue
@@ -164,7 +160,6 @@ def main():
                                 bb.DeleteBranch(project['key'], repo['name'], branch['displayId'])
                                 message = "%s %s %s Branch delete" % (project['name'], repo['name'], branch['displayId'])
                                 logger(message)
-                            msg_delete = msg_delete + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                             try:
                                 branch_list_delete[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                             except KeyError:
@@ -188,14 +183,12 @@ def main():
                         if tdiff.days > 30:
                             task_status = check_task_status(task)
                             if task_status:
-                                msg_check = msg_check + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                                 try:
                                     branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                                 except KeyError:
                                     branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
 #                           print("Difference is %d days %d hours" % (tdiff.days, tdiff.seconds/3600))
                 else:
-                   msg_invalidname = msg_invalidname + preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
                    division = get_division(branch['displayId'])
                    try:
                        branch_list_invalidname[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')

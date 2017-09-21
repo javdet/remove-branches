@@ -4,6 +4,7 @@
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
+from email.header import Header
 
 class Mail:
 
@@ -15,13 +16,13 @@ class Mail:
 # Отправка сообщения
     def Send(self, msg_type, toaddr, content, division):
         if msg_type == "delete":
-            self.msg['Subject'] = "Список веток для удаления %s" % division
+            self.msg['Subject'] = Header("Список веток для удаления %s" % division, 'utf-8')
             message = "Ветки, которые будут удалены автоматически"
         elif msg_type == "check":
-            self.msg['Subject'] = "Список веток для проверки %s" % division
+            self.msg['Subject'] = Header("Список веток для проверки %s" % division, 'utf-8')
             message = "Просьба проверить нужны ли ветки и при необходимости удалить" 
         elif msg_type == "invalid_name":
-            self.msg['Subject'] = "Список веток с некорректным имененем %s" % division
+            self.msg['Subject'] = Header("Список веток с некорректным имененем %s" % division, 'utf-8')
             message = "Следующие ветки имеют некорректное название" 
         
         self.msg['To'] = toaddr
@@ -64,11 +65,6 @@ background-color: #D3D3D3;
             return -2
         except SMTPDataError:
             return -3
-
-    def SendTest(self, toaddr, content):
-        self.msg['Subject'] = "Список веток для удаления"
-        self.msg['To'] = toaddr
-        self.smtp.sendmail(self.msg['From'], self.msg['To'], content)
 
     def close(self):
         self.smtp.quit()
