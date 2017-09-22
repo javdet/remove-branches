@@ -27,6 +27,14 @@ def check_branch_name(project, repo, branch):
     else:
         return 0
 
+# Получение имени автора ветки
+def get_author(branch):
+  try:
+    author = branch['metadata']['com.github.wadahiro.bitbucket.branchauthor:branchAuthor']['author']['displayName']
+    return author
+  except KeyError:
+    return "Unknown"
+
 # Получение имени отдела
 def get_division(branch):
     if len(division_template.findall(branch)) == 1:
@@ -49,14 +57,15 @@ def check_task_status(task):
             return 0
 
 # Форматирование данных
-def preparing(project, repo, branch):
+def preparing(project, repo, branch, author):
     content = """
 <tr>
 <td>%s</td>
 <td>%s</td>
 <td>%s</td>
+<td>%s</td>
 </tr>
-""" % (project, repo, branch)
+""" % (project, repo, branch, author)
     return content
 
 # Рассылка сообщений
@@ -148,9 +157,10 @@ def main():
                 if branch['displayId'] in config.exclude_branches:
                     continue
                 task = check_branch_name(project['name'], repo['name'], branch['displayId'])
+                division = get_division(branch['displayId'])
+                author = get_author(branch)
                 if task:
                     branch_size = check_branch_merge(bb, project, repo, branch)
-                    division = get_division(branch['displayId'])
 
 # Нет изменений относительно ветки назначения
                     if branch_size == 0:
@@ -161,16 +171,16 @@ def main():
                                 message = "%s %s %s Branch delete" % (project['name'], repo['name'], branch['displayId'])
                                 logger(message)
                             try:
-                                branch_list_delete[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                                branch_list_delete[division] += preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
                             except KeyError:
-                                branch_list_delete[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                                branch_list_delete[division] = preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
 
 # Не удалось сравнить изменения
                     elif branch_size == -1:
                         try:
-                            branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                            branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
                         except KeyError:
-                            branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                            branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
 
 # Изменения есть или не было мержа
                     elif branch_size > 0 or branch_size == -2:
@@ -184,16 +194,15 @@ def main():
                             task_status = check_task_status(task)
                             if task_status:
                                 try:
-                                    branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                                    branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
                                 except KeyError:
-                                    branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                                    branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
 #                           print("Difference is %d days %d hours" % (tdiff.days, tdiff.seconds/3600))
                 else:
-                   division = get_division(branch['displayId'])
                    try:
-                       branch_list_invalidname[division] += preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                       branch_list_invalidname[division] += preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
                    except KeyError:
-                       branch_list_invalidname[division] = preparing(project['name'], repo['name'], branch['displayId']).encode('utf-8')
+                       branch_list_invalidname[division] = preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
 
     # Информирование о невалидных именах
     send_mail("invalid_name", branch_list_invalidname)

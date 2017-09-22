@@ -49,6 +49,7 @@ background-color: #D3D3D3;
 <th>Проект</th>
 <th>Репозиторий</th>
 <th>Ветка</th>
+<th>Автор</th>
 </tr>
 %s
 </table>
