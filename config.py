@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-BASE_URL_BITBUCKET = "https://stash.itmh.ru/rest"
+BASE_URL_BITBUCKET_UI = "https://stash.itmh.ru"
+BASE_URL_BITBUCKET = "%s/rest" % BASE_URL_BITBUCKET_UI
 USER_BITBUCKET = "deployer"
 PASS_BITBUCKET = "taQeq9VMFi"
 
@@ -24,6 +25,7 @@ MAIL = {
   "DIRI532": "DIR.I5.3.2.users@itmh.ru",
   "test": "byvshev.sergey@itmh.ru"
 }
+
 
 # Указать тот же путь в файле ротации
 LOG_FILE = "/var/log/rmbranch.log"

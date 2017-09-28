@@ -20,7 +20,7 @@ def logger(message):
     f.close
 
 # Проверка корректности имени
-def check_branch_name(project, repo, branch):
+def check_branch_name(branch):
     if len(branch_template.findall(branch)) == 1:
         task_id = "DIRI%s-%s" % (branch_template.findall(branch)[0][1], branch_template.findall(branch)[0][2])
         return task_id
@@ -57,15 +57,16 @@ def check_task_status(task):
             return 0
 
 # Форматирование данных
-def preparing(project, repo, branch, author):
+def preparing(project, repo, branch, author, projectkey, branchid):
+    url = "%s/projects/%s/repos/%s/browse?at=%s" % (config.BASE_URL_BITBUCKET_UI, projectkey, repo, branchid)
     content = """
 <tr>
 <td>%s</td>
 <td>%s</td>
-<td>%s</td>
+<td><a href="%s">%s</a></td>
 <td>%s</td>
 </tr>
-""" % (project, repo, branch, author)
+""" % (project, repo, url, branch,  author)
     return content
 
 # Рассылка сообщений
@@ -87,14 +88,6 @@ def check_branch_merge(bb, project, repo, branch):
     if branch['metadata'].get('com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'):
         if branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'].get('pullRequest'):
             if branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['state'] == "MERGED":
-#                print(branch['displayId'], 
-#                    branch['id'], 
-#                    branch['latestCommit'], 
-#                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:ahead-behind-metadata-provider']['ahead'],
-#                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['state'],
-#                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['toRef']['displayId'],
-#                    branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['toRef']['id']
-#                )
                 compare = bb.CompareCommits(project['key'], 
                             repo['name'], 
                             branch['id'], 
@@ -104,17 +97,9 @@ def check_branch_merge(bb, project, repo, branch):
                     message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], compare['errors'][0]['message'])
                     logger(message)
                     return -1
-#                print(compare)
                 return(compare['size'])
         elif branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['merged']:
             pr = bb.GetPullRequests(project['key'], repo['name'], branch['id'], 'MERGED')
-#            print(branch['id'], pr)
-#            print(branch['displayId'], 
-#                branch['id'], 
-#                branch['latestCommit'], 
-#                branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:ahead-behind-metadata-provider']['ahead'],
-#                pr['values'][0]['toRef']['id']
-#            )
             compare = bb.CompareCommits(project['key'], 
                         repo['name'], 
                         branch['id'], 
@@ -124,7 +109,6 @@ def check_branch_merge(bb, project, repo, branch):
                 message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], compare['errors'][0]['message'])
                 logger(message)
                 return -1
-#            print(compare)
             return(compare['size'])
     else:
         return -2
@@ -143,20 +127,16 @@ def main():
         if project['name'].encode('utf8') in config.exclude_projects:
             continue
 
-        print(project['key'], project['name'])
         repos = bb.GetRepositories(project['key'])
-
         for repo in repos['values']:
             if repo['name'].encode('utf8') in config.exclude_repo:
                 continue
         
-            print(repo['name'])
             branches = bb.GetBranches(project['key'], repo['name'])
-
             for branch in branches['values']:
                 if branch['displayId'] in config.exclude_branches:
                     continue
-                task = check_branch_name(project['name'], repo['name'], branch['displayId'])
+                task = check_branch_name(branch['displayId'])
                 division = get_division(branch['displayId'])
                 author = get_author(branch)
                 if task:
@@ -171,17 +151,39 @@ def main():
                                 message = "%s %s %s Branch delete" % (project['name'], repo['name'], branch['displayId'])
                                 logger(message)
                             try:
-                                branch_list_delete[division] += preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
+                                branch_list_delete[division] += preparing(project['name'], 
+                                                                          repo['name'], 
+                                                                          branch['displayId'], 
+                                                                          author,
+                                                                          project['key'], 
+                                                                          branch['id']
+                                                                ).encode('utf-8')
                             except KeyError:
-                                branch_list_delete[division] = preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
-
+                                branch_list_delete[division] = preparing(project['name'], 
+                                                                         repo['name'], 
+                                                                         branch['displayId'], 
+                                                                         author,
+                                                                         project['key'], 
+                                                                         branch['id']
+                                                               ).encode('utf-8')
 # Не удалось сравнить изменения
                     elif branch_size == -1:
                         try:
-                            branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
+                            branch_list_check[division] += preparing(project['name'], 
+                                                                     repo['name'], 
+                                                                     branch['displayId'], 
+                                                                     author,
+                                                                     project['key'], 
+                                                                     branch['id']
+                                                                    ).encode('utf-8')
                         except KeyError:
-                            branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
-
+                            branch_list_check[division] = preparing(project['name'], 
+                                                                    repo['name'], 
+                                                                    branch['displayId'], 
+                                                                    author,
+                                                                    project['key'], 
+                                                                    branch['id']
+                                                                   ).encode('utf-8')
 # Изменения есть или не было мержа
                     elif branch_size > 0 or branch_size == -2:
                         try:
@@ -194,15 +196,39 @@ def main():
                             task_status = check_task_status(task)
                             if task_status:
                                 try:
-                                    branch_list_check[division] += preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
+                                    branch_list_check[division] += preparing(project['name'], 
+                                                                             repo['name'], 
+                                                                             branch['displayId'], 
+                                                                             author,
+                                                                             project['key'], 
+                                                                             branch['id']
+                                                                            ).encode('utf-8')
                                 except KeyError:
-                                    branch_list_check[division] = preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
-#                           print("Difference is %d days %d hours" % (tdiff.days, tdiff.seconds/3600))
+                                    branch_list_check[division] = preparing(project['name'], 
+                                                                            repo['name'], 
+                                                                            branch['displayId'], 
+                                                                            author,
+                                                                            project['key'], 
+                                                                            branch['id']
+                                                                           ).encode('utf-8')
+# Некорректное название ветки
                 else:
                    try:
-                       branch_list_invalidname[division] += preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
+                       branch_list_invalidname[division] += preparing(project['name'], 
+                                                                      repo['name'], 
+                                                                      branch['displayId'], 
+                                                                      author,
+                                                                      project['key'], 
+                                                                      branch['id']
+                                                                     ).encode('utf-8')
                    except KeyError:
-                       branch_list_invalidname[division] = preparing(project['name'], repo['name'], branch['displayId'], author).encode('utf-8')
+                       branch_list_invalidname[division] = preparing(project['name'], 
+                                                                     repo['name'], 
+                                                                     branch['displayId'], 
+                                                                     author,
+                                                                     project['key'], 
+                                                                     branch['id']
+                                                                    ).encode('utf-8')
 
     # Информирование о невалидных именах
     send_mail("invalid_name", branch_list_invalidname)
