@@ -11,7 +11,7 @@ USER_JIRA = "service_atlas_assist"
 PASS_JIRA = "HDgbf67sgwk"
 
 # 1 - удалять, 0 - только оповещать
-TODELETE = 0
+TODELETE = 1
 
 MAIL = {
   "fromaddr": "noreply@stash.itmh.ru",
