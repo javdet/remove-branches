@@ -1,29 +1,38 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 
 BASE_URL_BITBUCKET_UI = "https://stash.itmh.ru"
 BASE_URL_BITBUCKET = "%s/rest" % BASE_URL_BITBUCKET_UI
 USER_BITBUCKET = "deployer"
 PASS_BITBUCKET = "taQeq9VMFi"
 
-BASE_URL_JIRA = "https://plan.itmh.local/rest/api/2"
-USER_JIRA = "service_atlas_assist"
-PASS_JIRA = "HDgbf67sgwk"
+bitbucket = {
+    "ui": "https://stash.itmh.ru",
+    "rest": "%s/rest" % BASE_URL_BITBUCKET_UI,
+    "user": "deployer",
+    "password": "taQeq9VMFi"
+}
+
+jira = {
+    "rest": "https://plan.itmh.local/rest/api/2",
+    "user": "service_atlas_assist",
+    "password": "HDgbf67sgwk"
+}
 
 # 1 - удалять, 0 - только оповещать
-TODELETE = 1
+TODELETE = 0
 
 MAIL = {
-  "fromaddr": "noreply@stash.itmh.ru",
-  "smtp": "mail.sis.mirasystem.net",
-  "DIRI52": "DIR.I5.2.users@itmh.ru",
-  "DIRI525": "DIR.I5.2.5.users@itmh.ru",
-  "DIRI521": "DIR.I5.2.1.users@itmh.ru",
-  "DIRI522": "DIR.I5.2.2.users@itmh.ru",
-  "DIRI523": "DIR.I5.2.3.users@itmh.ru",
-  "DIRI54": "DIR.I5.4.users@itmh.ru",
-  "DIRI532": "DIR.I5.3.2.users@itmh.ru",
-  "test": "byvshev.sergey@itmh.ru"
+    "fromaddr": "noreply@stash.itmh.ru",
+    "smtp": "mail.sis.mirasystem.net",
+    "DIRI52": "DIR.I5.2.users@itmh.ru",
+    "DIRI525": "DIR.I5.2.5.users@itmh.ru",
+    "DIRI521": "DIR.I5.2.1.users@itmh.ru",
+    "DIRI522": "DIR.I5.2.2.users@itmh.ru",
+    "DIRI523": "DIR.I5.2.3.users@itmh.ru",
+    "DIRI54": "DIR.I5.4.users@itmh.ru",
+    "DIRI532": "DIR.I5.3.2.users@itmh.ru",
+    "test": "byvshev.sergey@itmh.ru"
 }
 
 

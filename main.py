@@ -2,22 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import config
 import re
 from datetime import datetime
-from bitbucket import Bitbucket
-from jira import Jira
-from mail import Mail
+from configs import config
+from lib.bitbucket import BitbucketRepository
+from lib.jira import JiraRepository
+from lib.mail import Mail
+from lib.logger import Logger
 
 branch_template = re.compile("^(.*)/DIRI(\w+)-(\d+)$")
 division_template = re.compile("^(.*)/DIRI(\d+)-(\d+)$")
-
-# Логирование
-def logger(message):
-    date = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
-    f = open(config.LOG_FILE, 'a')
-    f.write(date+" "+message.encode('utf-8')+"\n")
-    f.close
 
 # Проверка корректности имени
 def check_branch_name(branch):
@@ -48,7 +42,7 @@ def check_task_status(task):
     issue = jira.GetIssue(task)
     if issue.get('errorMessages'):
         message = "%s Error: %s" % (task, str(issue['errorMessages']))
-        logger(message)
+        logger.Write(message)
         return -1
     else:
         if issue['fields']['status']['id'] == "6":
@@ -79,7 +73,7 @@ def send_mail(msg_type, msg):
             smtp.Send(msg_type, "%s, %s" % (config.MAIL[key], config.MAIL['DIRI525']), value, key.encode('utf-8'))
         else:
             message = "No RCPT mail KEY %s" % key
-            logger(message)
+            logger.Write(message)
         smtp.close()
 
 
@@ -95,7 +89,7 @@ def check_branch_merge(bb, project, repo, branch):
                 )
                 if compare.get('errors'):
                     message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], compare['errors'][0]['message'])
-                    logger(message)
+                    logger.Write(message)
                     return -1
                 return(compare['size'])
         elif branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['merged']:
@@ -107,7 +101,7 @@ def check_branch_merge(bb, project, repo, branch):
             )
             if compare.get('errors'):
                 message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], compare['errors'][0]['message'])
-                logger(message)
+                logger.Write(message)
                 return -1
             return(compare['size'])
     else:
@@ -115,7 +109,8 @@ def check_branch_merge(bb, project, repo, branch):
 
 
 def main():
-    logger("Start")
+    logger = Logger(config.LOG_FILE)
+    logger.Write("Start")
     bb = Bitbucket(config.BASE_URL_BITBUCKET, config.USER_BITBUCKET, config.PASS_BITBUCKET)
     projects = bb.GetProjects()
 
@@ -149,7 +144,7 @@ def main():
                             if config.TODELETE:
                                 bb.DeleteBranch(project['key'], repo['name'], branch['displayId'])
                                 message = "%s %s %s Branch delete" % (project['name'], repo['name'], branch['displayId'])
-                                logger(message)
+                                logger.Write(message)
                             try:
                                 branch_list_delete[division] += preparing(project['name'], 
                                                                           repo['name'], 
@@ -190,7 +185,7 @@ def main():
                             tdiff = datetime.now() - datetime.fromtimestamp(int(str(branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:latest-commit-metadata']['authorTimestamp'])[0:10]))
                         except KeyError, e:
                             message = "%s %s %s Key Error: %s" % (project['name'], repo['name'], branch['displayId'], str(e))
-                            logger(message)
+                            logger.Write(message)
                             continue
                         if tdiff.days > 30:
                             task_status = check_task_status(task)
@@ -239,7 +234,7 @@ def main():
     
     # Информирование о старых ветках
     send_mail("check", branch_list_check)
-    logger("Stop")
+    logger.Write("Stop")
 
 if __name__ == "__main__": 
     main()
