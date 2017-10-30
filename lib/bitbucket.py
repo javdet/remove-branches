@@ -4,7 +4,7 @@ import json
 import requests
 
 
-class BitbucketRepository(object):
+class Bitbucket(object):
 
     def __init__(self, base_url, login, password):
         self.auth = (login, password)
