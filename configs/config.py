@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
 
-
-BASE_URL_BITBUCKET_UI = "https://stash.itmh.ru"
-BASE_URL_BITBUCKET = "%s/rest" % BASE_URL_BITBUCKET_UI
-USER_BITBUCKET = "deployer"
-PASS_BITBUCKET = "taQeq9VMFi"
-
-bitbucket = {
+# Реквизиты подключения к API Bitbucket
+BITBUCKET = {
     "ui": "https://stash.itmh.ru",
-    "rest": "%s/rest" % BASE_URL_BITBUCKET_UI,
+    "rest": "https://stash.itmh.ru/rest",
     "user": "deployer",
     "password": "taQeq9VMFi"
 }
 
-jira = {
+# Реквизиты подключения к API Jira
+JIRA = {
     "rest": "https://plan.itmh.local/rest/api/2",
     "user": "service_atlas_assist",
     "password": "HDgbf67sgwk"
@@ -22,9 +18,41 @@ jira = {
 # 1 - удалять, 0 - только оповещать
 TODELETE = 0
 
+DELETE_CONDITIONS = [
+    {
+        "isBranchValid": 1,
+        "isBranchMerged": 1,
+        "noBranchDiff": 1,
+        "isTaskClosed": 1
+    },
+    {
+        "noBranchDiffToDevelop": 1,
+        "isTaskClosed": 1
+    }
+]
+
+SENDMAIL_CONDITIONS = [
+    {
+        "isBranchMerged": 1,
+        "isTaskClosed": 1,
+        "isBranchOlder": 1
+    },
+    {
+        "isBranchValid": 0
+    }
+]
+
+BRANCH_NAME_TEMPLATE = "^(.*)/DIRI(\w+)-(\d+)$"
+DIVISION_NAME_TEMPLATE = "^(.*)/DIRI(\d+)-(\d+)$"
+
+# Параметры отправки сообщений. fromaddr и smtp обязательные параметры.
+# fromaddr - Адрес отправителя
+# smtp - адрес SMTP сервера
+# Остальные параметры относятся к адресам получателей
 MAIL = {
     "fromaddr": "noreply@stash.itmh.ru",
     "smtp": "mail.sis.mirasystem.net",
+    "default": "DIR.I5.2.5.users@itmh.ru",
     "DIRI52": "DIR.I5.2.users@itmh.ru",
     "DIRI525": "DIR.I5.2.5.users@itmh.ru",
     "DIRI521": "DIR.I5.2.1.users@itmh.ru",
@@ -40,7 +68,7 @@ MAIL = {
 LOG_FILE = "/var/log/rmbranch.log"
 
 # Проекты в которых проверть не нужно
-exclude_projects = [
+EXCLUDE_PROJECTS = [
     'ARM',
     'Assistant',
     'DHCP Web Service',
@@ -59,10 +87,10 @@ exclude_projects = [
 ]
 
 # Репозитории в которых проверть не нужно
-exclude_repo = []
+EXCLUDE_REPOS = []
 
 # Ветки в которых проверть не нужно
-exclude_branches = [
+EXCLUDE_BRANCHES = [
     'master',
     'develop'
 ]

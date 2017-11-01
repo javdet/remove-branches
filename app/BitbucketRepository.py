@@ -6,37 +6,37 @@ from ..lib.bitbucket import Bitbucket
 class BitbucketRepository(object):
 
     def __init__(self):
-        bb = Bitbucket(
-                       config.BASE_URL_BITBUCKET, 
-                       config.USER_BITBUCKET, 
-                       config.PASS_BITBUCKET
-                      )
+        self.bb = Bitbucket(
+            config.BITBUCKET['rest'], 
+            config.BITBUCKET['user'],  
+            config.BITBUCKET['password'], 
+        )
 
     def GetProjectList(self):
-        projects = bb.GetProjects()
+        projects = self.bb.GetProjects()
         result_projects = []
         for project in projects['values']:
-            if project['name'].encode('utf8') in config.exclude_projects:
+            if project['name'].encode('utf8') in config.EXCLUDE_PROJECTS:
                 continue
             else:
                 result_projects.append(project)
         return result_projects
 
     def GetRepositoryList(self, project_key):
-        repos = bb.GetRepositories(project_key)
+        repos = self.bb.GetRepositories(project_key)
         result_repositories = []
         for repo in repos['values']:
-            if repo['name'].encode('utf8') in config.exclude_repo:
+            if repo['name'].encode('utf8') in config.EXCLUDE_REPOS:
                 continue
             else:
                 result_repositories.append(repo)
         return result_repositories
 
     def GetBranchList(self, project_key, repo_name):
-        branches = bb.GetBranches(project['key'], repo['name'])
+        branches = self.bb.GetBranches(project['key'], repo['name'])
         result_branches = []
         for branch in branches['values']:
-            if branch['displayId'] in config.exclude_branches:
+            if branch['displayId'] in config.EXCLUDE_BRANCHES:
                 continue
             else:
                 result_branches.append(branch)
