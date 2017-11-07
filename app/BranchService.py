@@ -62,6 +62,7 @@ class BranchService(object):
             "project_key": project['key'],
             "repo": repo['name'],
             "name": branch['displayId'],
+            "branch_id": branch['id'],
             "division": division,
             "author": author,
             "difference": difference

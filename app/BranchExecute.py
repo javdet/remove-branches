@@ -7,9 +7,9 @@ from ..lib.bitbucket import Bitbucket
 class BranchExecute(object):
 
     # Форматирование данных
-    def preparing(project, repo, branch, author, projectkey, branchid):
+    def FormatingData(project, repo, branch, author, projectkey, branchid):
         url = "%s/projects/%s/repos/%s/browse?at=%s" % (
-            config.bitbucket['ui'], 
+            config.Bitbucket['ui'], 
             projectkey, 
             repo, 
             branchid
@@ -33,8 +33,8 @@ class BranchExecute(object):
         )
         for branch_marked in branch_marked_list:
             for condition in config.DELETE_CONDITIONS:
-                shared_items = set(condition.items()) & (branch_marked.items())
-                if shared_items == len(condition):
+                shared_items = set(condition.items()) & set(branch_marked.items())
+                if len(shared_items) == len(condition):
                     bb.DeleteBranch(
                         branch_marked['project_key'], 
                         branch_marked['repo'], 
@@ -45,16 +45,27 @@ class BranchExecute(object):
                     break
 
     # Рассылка сообщений
-    def SendEmail(self, msg_type, msg):
+    def SendEmail(self, branch_marked_list):
         branch_list_invalidname = {}
         branch_list_check = {}
-        branch_list_check[division] += preparing(project['name'],
-                                                                     repo['name'],
-                                                                     branch['displayId'],
-                                                                     author,
-                                                                     project['key'],
-                                                                     branch['id']
-                                                                    ).encode('utf-8')
+        bb = Bitbucket(
+            config.BITBUCKET['rest'],
+            config.BITBUCKET['user'],
+            config.BITBUCKET['password'],
+        )
+        for branch_marked in branch_marked_list:
+            for key in config.SENDMAIL_CONDITIONS:
+                shared_items = set(config.SENDMAIL_CONDITIONS[key].items()) & set(branch_marked.items())
+                if len(shared_items) == len(config.SENDMAIL_CONDITIONS[key]):
+                    branch_list_check[branch_marked.division] += FormatingData(
+                        branch_marked['project'],
+                        branch_marked['repo'],
+                        branch_marked['name'],
+                        branch_marked['author'],
+                        branch_marked['project_key'],
+                        branch_marked['branch_id']
+                    ).encode('utf-8')
+
         for key, value in msg.items():
             smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
             if key == "DIRI525":

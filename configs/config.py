@@ -31,16 +31,16 @@ DELETE_CONDITIONS = [
     }
 ]
 
-SENDMAIL_CONDITIONS = [
-    {
+SENDMAIL_CONDITIONS = {
+    "check": {
         "isBranchMerged": 1,
         "isTaskClosed": 1,
         "isBranchOlder": 1
     },
-    {
+    "invalid_name": {
         "isBranchValid": 0
     }
-]
+}
 
 BRANCH_NAME_TEMPLATE = "^(.*)/DIRI(\w+)-(\d+)$"
 DIVISION_NAME_TEMPLATE = "^(.*)/DIRI(\d+)-(\d+)$"
