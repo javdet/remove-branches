@@ -1,29 +1,66 @@
 # -*- coding: utf-8 -*-
 
+from BitbucketRepository import BitbucketRepository
+from BranchService import BranchService
 
 class BranchHandler(object):
 
+    # Управляющий метод
     def Handle(self):
-        
-        
-    # Получаем список проектов в Bibucket
-    bb = BitbucketRepository()
-    projects = bb.GetProjectList()
+        self.map_by_branch = self.GetBranchesStatus()
+        # self.map_by_branch = self.GetBranchesAction(self.map_by_branch)
+        # self.BranchesExecute(self.map_by_branch)
+        print(self.map_by_branch)
 
-    bs = BranchService()
+    """
+    Метод создает структуру результатов проверок веток по всем 
+    проектам и репозиториям
+    Возвращает структуру:
+    [
+        {
+            "project": 
+            "project_key":
+            "repo": 
+            "name":
+            "branch_id": 
+            "division": 
+            "author": 
+            "difference": 
+            "isBranchValid": 
+            "isBranchMerged": 
+            "noBranchDiff": 
+            "isTaskClosed": 
+            "noBranchDiffToDevelop": 
+            "isBranchOlder": 
+        },
+        {...}
+    ] 
+    """
+    def GetBranchesStatus(self):
+        br = BitbucketRepository()
+        bs = BranchService()
+        projects = br.GetProjectList()
+        marked_branch_list = []
 
-    marked_branch_list = []
-    # Получаем список репозиториев для каждого проекта
-    for project in projects:
-        repos = bb.GetRepositoryList(project['key'])
+        for project in projects:
+            repos = br.GetRepositoryList(project['key'])
+            for repo in repos:
+                branches = br.GetBranchList(project['key'], repo['name'])
+                    for branch in branches:
+                        marked_branch_list.append(bs.GetMarkForBranch(project, repo, branch))
 
-        # Получаем список веток для каждого репозитория
-        for repo in repos:
-            branches = bb.GetBranchList(project['key'], repo['name'])
+        return marked_branch_list
+                
 
-            # Для каждой ветки создаем структуру с результатами проверки
-            for branch in branches:
-                marked_branch_list.append(bs.GetMarkForBranch(project, repo, branch))
-    be = BranchExecute()
-    be.Deletebranch(marked_branch_list)
-    be.SendEmail(marked_branch_list)
+    def GetBranchesAction(self):
+        pass
+    def BranchesExecute(self):
+        pass
+        # be.Deletebranch(marked_branch_list)
+        # be.SendEmail(marked_branch_list)
+    
+    
+
+    
+
+    

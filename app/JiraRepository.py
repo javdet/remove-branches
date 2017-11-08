@@ -13,7 +13,10 @@ class JiraRepository(object):
             config.JIRA['password']
         )
 
-    # Проверка статуса задачи
+    """
+    Проверка статуса задачи
+    1 - если задача закрыта, 0 - нет
+    """
     def GetTaskStatus(self, task):
         issue = self.jira.GetIssue(task)
         if issue.get('errorMessages'):
@@ -21,7 +24,7 @@ class JiraRepository(object):
             logger = Logger(config.LOG_FILE)
             logger.Write(message)
             logger.close()
-            return -1
+            return 0
         else:
             if issue['fields']['status']['id'] == "6":
                 return 1
