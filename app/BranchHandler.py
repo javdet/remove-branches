@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from BitbucketRepository import BitbucketRepository
-from BranchService import BranchService
+from .BitbucketRepository import BitbucketRepository
+from .BranchService import BranchService
 
 class BranchHandler(object):
 
@@ -46,8 +46,10 @@ class BranchHandler(object):
             repos = br.GetRepositoryList(project['key'])
             for repo in repos:
                 branches = br.GetBranchList(project['key'], repo['name'])
-                    for branch in branches:
-                        marked_branch_list.append(bs.GetMarkForBranch(project, repo, branch))
+                for branch in branches:
+                    marked_branch_list.append(
+                        bs.GetMarkForBranch(project, repo, branch)
+                    )
 
         return marked_branch_list
                 

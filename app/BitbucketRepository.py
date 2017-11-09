@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ..configs import config
+from .configs import config
 from ..lib.bitbucket import Bitbucket
 
 class BitbucketRepository(object):
