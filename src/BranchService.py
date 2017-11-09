@@ -2,10 +2,10 @@
 
 import re
 from datetime import datetime
-from ..lib.Bitbucket import Bitbucket
-from ..lib.logger import Logger
+from lib.Bitbucket import Bitbucket
+from lib.logger import Logger
 from JiraRepository import JiraRepository
-from ..configs import config
+from configs import config
 
 class BranchService(object):
 

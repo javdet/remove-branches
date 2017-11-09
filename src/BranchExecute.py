@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from ..configs import config
-from ..lib.mail import Mail
-from ..lib.bitbucket import Bitbucket
+from configs import config
+from lib.mail import Mail
+from lib.bitbucket import Bitbucket
 
 class BranchExecute(object):
 

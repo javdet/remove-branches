@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from ..configs import config
-from ..lib.jira import Jira
-from ..lib.logger import Logger
+from configs import config
+from lib.jira import Jira
+from lib.logger import Logger
 
 class JiraRepository(object):
 

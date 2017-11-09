@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from app.BranchHandler import BranchHandler
-from lib.logger import Logger
+from src.BranchHandler import BranchHandler
+from src.lib.logger import Logger
 
 """
 Метод запускает процедуру проверки веток на соответствие
