@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from configs import config
-from lib.jira import Jira
-from lib.logger import Logger
+from .configs import config
+from .lib.jira import Jira
+from .lib.logger import Logger
 
 class JiraRepository(object):
 
@@ -23,7 +23,7 @@ class JiraRepository(object):
             message = "%s Error: %s" % (task, str(issue['errorMessages']))
             logger = Logger(config.LOG_FILE)
             logger.Write(message)
-            logger.close()
+            logger.Close()
             return 0
         else:
             if issue['fields']['status']['id'] == "6":

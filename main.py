@@ -3,6 +3,7 @@
 
 from src.BranchHandler import BranchHandler
 from src.lib.logger import Logger
+from src.configs import config
 
 """
 Метод запускает процедуру проверки веток на соответствие
@@ -18,6 +19,7 @@ def main():
     bh.Handle()
 
     logger.Write("Stop")
+    logger.Close()
 
 if __name__ == "__main__": 
     main()

@@ -9,7 +9,7 @@ class Logger(object):
         self.f = open(log_file, 'a')
 
     def Write(self, message):
-        self.f.write(self.date+" "+message.encode('utf-8')+"\n")
+        self.f.write(self.date+" "+message+"\n")
         
     def Close(self):
-        self.close()
+        self.f.close()

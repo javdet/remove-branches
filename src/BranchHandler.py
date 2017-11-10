@@ -10,7 +10,6 @@ class BranchHandler(object):
         self.map_by_branch = self.GetBranchesStatus()
         # self.map_by_branch = self.GetBranchesAction(self.map_by_branch)
         # self.BranchesExecute(self.map_by_branch)
-        print(self.map_by_branch)
 
     """
     Метод создает структуру результатов проверок веток по всем 

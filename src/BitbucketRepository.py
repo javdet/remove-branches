@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from configs import config
-from lib.bitbucket import Bitbucket
+from .configs import config
+from .lib.bitbucket import Bitbucket
 
 class BitbucketRepository(object):
 
@@ -33,7 +33,7 @@ class BitbucketRepository(object):
         return result_repositories
 
     def GetBranchList(self, project_key, repo_name):
-        branches = self.bb.GetBranches(project['key'], repo['name'])
+        branches = self.bb.GetBranches(project_key, repo_name)
         result_branches = []
         for branch in branches['values']:
             if branch['displayId'] in config.EXCLUDE_BRANCHES:

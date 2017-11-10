@@ -3,7 +3,7 @@
 import json
 import requests
 
-class JiraRepository(object):
+class Jira(object):
 
     def __init__(self, base_url, login, password):
         self.auth = (login, password)

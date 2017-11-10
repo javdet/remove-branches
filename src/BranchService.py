@@ -2,10 +2,10 @@
 
 import re
 from datetime import datetime
-from lib.Bitbucket import Bitbucket
-from lib.logger import Logger
-from JiraRepository import JiraRepository
-from configs import config
+from .lib.bitbucket import Bitbucket
+from .lib.logger import Logger
+from .JiraRepository import JiraRepository
+from .configs import config
 
 class BranchService(object):
 
@@ -34,6 +34,13 @@ class BranchService(object):
     }
     """
     def GetMarkForBranch(self, project, repo, branch):
+        self.bb = Bitbucket(
+            config.BITBUCKET['rest'],
+            config.BITBUCKET['user'],
+            config.BITBUCKET['password']
+        )
+        self.logger = Logger(config.LOG_FILE)
+
         task = self.GetTaskByBranchName(branch['displayId'])
         jr = JiraRepository()
         task_status = jr.GetTaskStatus(task)
@@ -47,16 +54,16 @@ class BranchService(object):
             branch
         )
         diff_develop = self.CompareBranch(
-            project['key'], 
-            repo['name'],
+            project, 
+            repo,
             branch,
             'develop'
         )
         if toref:
             branch_merged = 1
             difference = self.CompareBranch(
-                project['key'], 
-                repo['name'],
+                project, 
+                repo,
                 branch,
                 toref
             )
@@ -76,14 +83,15 @@ class BranchService(object):
             "branch_id": branch['id'],
             "division": division,
             "author": author,
-            "difference": difference
+            "difference": difference,
             "isBranchValid": branch_valid,
             "isBranchMerged": branch_merged,
-            "noBranchDiff": difference
+            "BranchDiff": difference,
             "isTaskClosed": task_status,
-            "noBranchDiffToDevelop": diff_develop,
+            "BranchDiffToDevelop": diff_develop,
             "isBranchOlder": age
         }
+        print(result)
         return result
 
     """
@@ -117,7 +125,7 @@ class BranchService(object):
     """
     def GetDivision(self, branch):
         if len(self.division_template.findall(branch)) == 1:
-            return "DIRI%s" % division_template.findall(branch)[0][1]
+            return "DIRI%s" % self.division_template.findall(branch)[0][1]
         else:
             return "DIRI525"
 
@@ -134,7 +142,7 @@ class BranchService(object):
                     return 0
             # Для случаев, когда мержилось несколько раз
             elif branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['merged']:
-                pr = bb.GetPullRequests(project, repo, branch['id'], 'MERGED')
+                pr = self.bb.GetPullRequests(project, repo, branch['id'], 'MERGED')
                 return pr['values'][0]['toRef']['id']
             else:
                 return 0
@@ -146,19 +154,20 @@ class BranchService(object):
     Возвращает 0 - нет изменений, 1 - есть
     """
     def CompareBranch(self, project, repo, branch, toref):
-        compare = bb.CompareCommits(project['key'],
-                            repo['name'],
-                            branch['id'],
-                            toref
-                 )
+        compare = self.bb.CompareCommits(
+            project['key'],
+            repo['name'],
+            branch['id'],
+            toref
+        )
         if compare.get('errors'):
             message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], compare['errors'][0]['message'])
-            logger.Write(message)
+            self.logger.Write(message)
             return 1
         if compare['size'] == 0:
             return(compare['size'])
         else:
-            return 1        
+            return 1
 
     """
     Проверка старше ли ветка 30 дней
@@ -169,9 +178,9 @@ class BranchService(object):
             tdiff = datetime.now() - datetime.fromtimestamp(
                 int(str(branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:latest-commit-metadata']['authorTimestamp'])[0:10])
             )
-        except KeyError, e:
+        except KeyError as e:
             message = "%s %s %s Key Error: %s" % (project, repo, branch['displayId'], str(e))
-            logger.Write(message)
+            self.logger.Write(message)
             return 0
         if tdiff.days > 30:
             return 1
