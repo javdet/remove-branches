@@ -2,13 +2,14 @@
 
 from .BitbucketRepository import BitbucketRepository
 from .BranchService import BranchService
+from .lib.logger import Logger
 
 class BranchHandler(object):
 
     # Управляющий метод
     def Handle(self):
-        self.map_by_branch = self.GetBranchesStatus()
-        # self.map_by_branch = self.GetBranchesAction(self.map_by_branch)
+        map_by_branch = self.GetBranchesStatus()
+        # map_by_branch = self.GetBranchesAction(map_by_branch)
         # self.BranchesExecute(self.map_by_branch)
 
     """
@@ -57,8 +58,24 @@ class BranchHandler(object):
         return marked_branch_list
                 
 
-    def GetBranchesAction(self):
-        pass
+    def GetBranchesAction(self, map_by_branch):
+        self.logger = Logger(config.LOG_FILE)
+        for branch_item in map_by_branch:
+            for condition in config.DELETE_CONDITIONS:
+                shared_items = set(condition.items()) & set(branch_item.items())
+                if len(shared_items) == len(condition):
+                    bb.DeleteBranch(
+                        branch_marked['project_key'], 
+                        branch_marked['repo'], 
+                        branch_marked['name']
+                    )
+                    message = "%s %s %s Branch delete" % (
+                        project['name'], 
+                        repo['name'], 
+                        branch['displayId']
+                    )
+                    self.logger.Write(message)
+                    break
     def BranchesExecute(self):
         pass
         # be.Deletebranch(marked_branch_list)
