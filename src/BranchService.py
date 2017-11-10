@@ -34,7 +34,7 @@ class BranchService(object):
     }
     """
     def GetMarkForBranch(self, project, repo, branch):
-        self.bb = Bitbucket(
+        self.bitbucket = Bitbucket(
             config.BITBUCKET['rest'],
             config.BITBUCKET['user'],
             config.BITBUCKET['password']
@@ -42,8 +42,8 @@ class BranchService(object):
         self.logger = Logger(config.LOG_FILE)
 
         task = self.GetTaskByBranchName(branch['displayId'])
-        jr = JiraRepository()
-        task_status = jr.GetTaskStatus(task)
+        jira = JiraRepository()
+        task_status = jira.GetTaskStatus(task)
 
         division = self.GetDivision(branch['displayId'])
         author = self.GetAuthor(branch)
@@ -59,21 +59,14 @@ class BranchService(object):
             branch,
             'develop'
         )
+        difference = 1
         if toref:
-            branch_merged = 1
             difference = self.CompareBranch(
                 project, 
                 repo,
                 branch,
                 toref
             )
-        else:
-            branch_merged = 0
-            difference = 1
-        if task:
-            branch_valid = 1
-        else:
-            branch_valid = 0
 
         result = {
             "project": project['name'],
@@ -84,8 +77,8 @@ class BranchService(object):
             "division": division,
             "author": author,
             "difference": difference,
-            "isBranchValid": branch_valid,
-            "isBranchMerged": branch_merged,
+            "isBranchValid": task,
+            "isBranchMerged": toref,
             "BranchDiff": difference,
             "isTaskClosed": task_status,
             "BranchDiffToDevelop": diff_develop,
@@ -142,7 +135,7 @@ class BranchService(object):
                     return 0
             # Для случаев, когда мержилось несколько раз
             elif branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['merged']:
-                pr = self.bb.GetPullRequests(project, repo, branch['id'], 'MERGED')
+                pr = self.bitbucket.GetPullRequests(project, repo, branch['id'], 'MERGED')
                 return pr['values'][0]['toRef']['id']
             else:
                 return 0
@@ -154,7 +147,7 @@ class BranchService(object):
     Возвращает 0 - нет изменений, 1 - есть
     """
     def CompareBranch(self, project, repo, branch, toref):
-        compare = self.bb.CompareCommits(
+        compare = self.bitbucket.CompareCommits(
             project['key'],
             repo['name'],
             branch['id'],

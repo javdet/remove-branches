@@ -36,18 +36,22 @@ class BranchHandler(object):
     ] 
     """
     def GetBranchesStatus(self):
-        br = BitbucketRepository()
-        bs = BranchService()
-        projects = br.GetProjectList()
+        bitbucket_repository = BitbucketRepository()
+        branch_service = BranchService()
+        projects = bitbucket_repository.GetProjectList()
         marked_branch_list = []
 
         for project in projects:
-            repos = br.GetRepositoryList(project['key'])
+            repos = bitbucket_repository.GetRepositoryList(
+                project['key']
+            )
             for repo in repos:
-                branches = br.GetBranchList(project['key'], repo['name'])
+                branches = bitbucket_repository.GetBranchList(
+                    project['key'], repo['name']
+                )
                 for branch in branches:
                     marked_branch_list.append(
-                        bs.GetMarkForBranch(project, repo, branch)
+                        branch_service.GetMarkForBranch(project, repo, branch)
                     )
 
         return marked_branch_list
