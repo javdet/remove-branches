@@ -16,7 +16,7 @@ class BitbucketRepository(object):
         projects = self.bitbucket.GetProjects()
         result_projects = []
         for project in projects['values']:
-            if project['name'].encode('utf8') not in config.EXCLUDE_PROJECTS:
+            if project['name'] not in config.EXCLUDE_PROJECTS:
                 result_projects.append(project)
                 
         return result_projects
@@ -25,7 +25,7 @@ class BitbucketRepository(object):
         repos = self.bitbucket.GetRepositories(project_key)
         result_repositories = []
         for repo in repos['values']:
-            if repo['name'].encode('utf8') not in config.EXCLUDE_REPOS:
+            if repo['name'] not in config.EXCLUDE_REPOS:
                 result_repositories.append(repo)
                 
         return result_repositories

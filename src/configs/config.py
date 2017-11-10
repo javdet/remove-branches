@@ -19,16 +19,16 @@ JIRA = {
 TODELETE = 0
 
 DELETE_CONDITIONS = [
-    {
-        "isBranchValid": 1,
-        "isBranchMerged": 1,
-        "noBranchDiff": 1,
-        "isTaskClosed": 1
-    },
-    {
-        "noBranchDiffToDevelop": 1,
-        "isTaskClosed": 1
-    }
+    [
+        "isBranchValid",
+        "isBranchMerged",
+        "noBranchDiff",
+        "isTaskClosed"
+    ],
+    [
+        "noBranchDiffToDevelop",
+        "isTaskClosed"
+    ]
 ]
 
 SENDMAIL_CONDITIONS = {

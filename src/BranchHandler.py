@@ -2,14 +2,16 @@
 
 from .BitbucketRepository import BitbucketRepository
 from .BranchService import BranchService
-from .lib.logger import Logger
 
 class BranchHandler(object):
 
+    def __init__(self):
+        self.branch_service = BranchService()
+        
     # Управляющий метод
     def Handle(self):
         map_by_branch = self.GetBranchesStatus()
-        # map_by_branch = self.GetBranchesAction(map_by_branch)
+        map_by_branch = self.GetBranchesAction(map_by_branch)
         # self.BranchesExecute(self.map_by_branch)
 
     """
@@ -38,7 +40,6 @@ class BranchHandler(object):
     """
     def GetBranchesStatus(self):
         bitbucket_repository = BitbucketRepository()
-        branch_service = BranchService()
         projects = bitbucket_repository.GetProjectList()
         marked_branch_list = []
 
@@ -52,30 +53,23 @@ class BranchHandler(object):
                 )
                 for branch in branches:
                     marked_branch_list.append(
-                        branch_service.GetMarkForBranch(project, repo, branch)
+                        self.branch_service.GetMarkForBranch(project, repo, branch)
                     )
 
         return marked_branch_list
                 
-
+    """
+    Метод создает структуру с указанием действий для каждой ветки
+    на основании сравнения с условиями
+    """
     def GetBranchesAction(self, map_by_branch):
-        self.logger = Logger(config.LOG_FILE)
+        map_branch_by_condition = []
+
         for branch_item in map_by_branch:
-            for condition in config.DELETE_CONDITIONS:
-                shared_items = set(condition.items()) & set(branch_item.items())
-                if len(shared_items) == len(condition):
-                    bb.DeleteBranch(
-                        branch_marked['project_key'], 
-                        branch_marked['repo'], 
-                        branch_marked['name']
-                    )
-                    message = "%s %s %s Branch delete" % (
-                        project['name'], 
-                        repo['name'], 
-                        branch['displayId']
-                    )
-                    self.logger.Write(message)
-                    break
+            map_branch_by_condition.append(
+                self.branch_service.GetForBranchByCondition(branch_item)
+            )
+            
     def BranchesExecute(self):
         pass
         # be.Deletebranch(marked_branch_list)

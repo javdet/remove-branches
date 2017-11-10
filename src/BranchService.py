@@ -12,6 +12,7 @@ class BranchService(object):
     def __init__(self):
         self.branch_template = re.compile(config.BRANCH_NAME_TEMPLATE)
         self.division_template = re.compile(config.DIVISION_NAME_TEMPLATE)
+        self.logger = Logger(config.LOG_FILE)
 
     """
     Метод запускает проверки для ветки
@@ -39,7 +40,6 @@ class BranchService(object):
             config.BITBUCKET['user'],
             config.BITBUCKET['password']
         )
-        self.logger = Logger(config.LOG_FILE)
 
         task = self.GetTaskByBranchName(branch['displayId'])
         jira = JiraRepository()
@@ -179,3 +179,21 @@ class BranchService(object):
             return 1
         else:
             return 0
+
+    """
+    Сравнение с условиями и выставления флагов
+    """
+    def GetForBranchByCondition(branch_item):
+        for condition in config.DELETE_CONDITIONS:
+            success_condition_count = 0
+            for condition_item in condition:
+                if branch_item[condition_item]:
+                    success_condition_count += 1
+            if len(condition) == success_condition_count:
+                message = "%s %s %s Branch delete" % (
+                    project['name'], 
+                    repo['name'], 
+                    branch['displayId']
+                )
+                logger.Write(message)
+                break
