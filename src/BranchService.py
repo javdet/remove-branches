@@ -183,7 +183,7 @@ class BranchService(object):
     """
     Сравнение с условиями и выставления флагов
     """
-    def GetForBranchByCondition(branch_item):
+    def GetForBranchByCondition(self, branch_item):
         for condition in config.DELETE_CONDITIONS:
             success_condition_count = 0
             for condition_item in condition:
@@ -191,9 +191,10 @@ class BranchService(object):
                     success_condition_count += 1
             if len(condition) == success_condition_count:
                 message = "%s %s %s Branch delete" % (
-                    project['name'], 
-                    repo['name'], 
-                    branch['displayId']
+                    condition_item['project'], 
+                    condition_item['repo'], 
+                    condition_item['name']
                 )
                 logger.Write(message)
                 break
+        return 0

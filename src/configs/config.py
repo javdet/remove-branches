@@ -22,11 +22,11 @@ DELETE_CONDITIONS = [
     [
         "isBranchValid",
         "isBranchMerged",
-        "noBranchDiff",
+        "BranchDiff",
         "isTaskClosed"
     ],
     [
-        "noBranchDiffToDevelop",
+        "BranchDiffToDevelop",
         "isTaskClosed"
     ]
 ]
