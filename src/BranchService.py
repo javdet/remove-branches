@@ -195,8 +195,8 @@ class BranchService(object):
     """
     def GetBranchByCondition(self, branch_item):
         branch_item['action'] = "no"
-        branch_result = GetBranchByConditionDeletion(branch_item)
-        branch_result = GetBranchByConditionNotification(branch_item)
+        branch_result = self.GetBranchByConditionDeletion(branch_item)
+        branch_result = self.GetBranchByConditionNotification(branch_item)
         print(branch_result)
         return branch_result
 
@@ -213,12 +213,12 @@ class BranchService(object):
                     branch_item['repo'], 
                     branch_item['name']
                 )
-                logger.Write(message)
+                self.logger.Write(message)
                 branch_item['action'] = "delete"
                 break
         return branch_item
     
-    def GetBranchByConditionNotification(branch_item)
+    def GetBranchByConditionNotification(self, branch_item):
         for condition in config.NOTIFY_CONDITIONS:
             success_condition_count = 0
             for condition_item in config.NOTIFY_CONDITIONS[condition]:
@@ -231,7 +231,7 @@ class BranchService(object):
                     branch_item['repo'], 
                     branch_item['name']
                 )
-                logger.Write(message)
+                self.logger.Write(message)
                 branch_item['action'] = "notify"
                 break
         return branch_item
