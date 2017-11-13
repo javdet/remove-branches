@@ -31,7 +31,7 @@ DELETE_CONDITIONS = [
     ]
 ]
 
-SENDMAIL_CONDITIONS = {
+NOTIFY_CONDITIONS = {
     "check": {
         "isBranchMerged": 1,
         "isTaskClosed": 1,

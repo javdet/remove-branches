@@ -135,7 +135,12 @@ class BranchService(object):
                     return 0
             # Для случаев, когда мержилось несколько раз
             elif branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['merged']:
-                pr = self.bitbucket.GetPullRequests(project, repo, branch['id'], 'MERGED')
+                pr = self.bitbucket.GetPullRequests(
+                    project, 
+                    repo, 
+                    branch['id'], 
+                    'MERGED'
+                )
                 return pr['values'][0]['toRef']['id']
             else:
                 return 0
@@ -154,7 +159,12 @@ class BranchService(object):
             toref
         )
         if compare.get('errors'):
-            message = "%s %s %s Error: %s" % (project['name'], repo['name'], branch['displayId'], compare['errors'][0]['message'])
+            message = "%s %s %s Error: %s" % (
+                project['name'], 
+                repo['name'], 
+                branch['displayId'], 
+                compare['errors'][0]['message']
+            )
             self.logger.Write(message)
             return 1
         if compare['size'] == 0:
@@ -183,18 +193,45 @@ class BranchService(object):
     """
     Сравнение с условиями и выставления флагов
     """
-    def GetForBranchByCondition(self, branch_item):
+    def GetBranchByCondition(self, branch_item):
+        branch_item['action'] = "no"
+        branch_result = GetBranchByConditionDeletion(branch_item)
+        branch_result = GetBranchByConditionNotification(branch_item)
+        print(branch_result)
+        return branch_result
+
+    def GetBranchByConditionDeletion(self, branch_item):
         for condition in config.DELETE_CONDITIONS:
             success_condition_count = 0
             for condition_item in condition:
                 if branch_item[condition_item]:
                     success_condition_count += 1
+
             if len(condition) == success_condition_count:
                 message = "%s %s %s Branch delete" % (
-                    condition_item['project'], 
-                    condition_item['repo'], 
-                    condition_item['name']
+                    branch_item['project'], 
+                    branch_item['repo'], 
+                    branch_item['name']
                 )
                 logger.Write(message)
+                branch_item['action'] = "delete"
                 break
-        return 0
+        return branch_item
+    
+    def GetBranchByConditionNotification(branch_item)
+        for condition in config.NOTIFY_CONDITIONS:
+            success_condition_count = 0
+            for condition_item in config.NOTIFY_CONDITIONS[condition]:
+                if branch_item[condition_item]:
+                    success_condition_count += 1
+
+            if len(config.NOTIFY_CONDITIONS[condition]) == success_condition_count:
+                message = "%s %s %s Branch sendmail" % (
+                    branch_item['project'], 
+                    branch_item['repo'], 
+                    branch_item['name']
+                )
+                logger.Write(message)
+                branch_item['action'] = "notify"
+                break
+        return branch_item

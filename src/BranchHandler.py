@@ -7,7 +7,7 @@ class BranchHandler(object):
 
     def __init__(self):
         self.branch_service = BranchService()
-        
+
     # Управляющий метод
     def Handle(self):
         map_by_branch = self.GetBranchesStatus()
@@ -67,7 +67,7 @@ class BranchHandler(object):
 
         for branch_item in map_by_branch:
             map_branch_by_condition.append(
-                self.branch_service.GetForBranchByCondition(branch_item)
+                self.branch_service.GetBranchByCondition(branch_item)
             )
             
     def BranchesExecute(self):
