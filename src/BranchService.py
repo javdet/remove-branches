@@ -182,7 +182,7 @@ class BranchService(object):
                 int(str(branch['metadata']['com.atlassian.bitbucket.server.bitbucket-branch:latest-commit-metadata']['authorTimestamp'])[0:10])
             )
         except KeyError as e:
-            message = "%s %s %s Key Error: %s" % (project, repo, branch['displayId'], str(e))
+            message = "%s %s %s Key Error: %s" % (project, repo, branch, str(e))
             self.logger.Write(message)
             return 0
         if tdiff.days > 30:

@@ -2,11 +2,13 @@
 
 from .BitbucketRepository import BitbucketRepository
 from .BranchService import BranchService
+from .BranchesExecute import BranchesExecute
 
 class BranchHandler(object):
 
     def __init__(self):
         self.branch_service = BranchService()
+        self.branch_execute = BranchesExecute()
 
     # Управляющий метод
     def Handle(self):
@@ -70,10 +72,10 @@ class BranchHandler(object):
                 self.branch_service.GetBranchByCondition(branch_item)
             )
             
-    def BranchesExecute(self):
+    def BranchesExecute(self, marked_branch_list):
         pass
-        # be.Deletebranch(marked_branch_list)
-        # be.SendEmail(marked_branch_list)
+        # self.branch_execute.DeleteBranch(marked_branch_list)
+        # self.branch_execute.SendEmail(marked_branch_list)
     
     
 
