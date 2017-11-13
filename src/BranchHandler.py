@@ -2,19 +2,19 @@
 
 from .BitbucketRepository import BitbucketRepository
 from .BranchService import BranchService
-from .BranchesExecute import BranchesExecute
+from .BranchExecute import BranchExecute
 
 class BranchHandler(object):
 
     def __init__(self):
         self.branch_service = BranchService()
-        self.branch_execute = BranchesExecute()
+        self.branch_execute = BranchExecute()
 
     # Управляющий метод
     def Handle(self):
         map_by_branch = self.GetBranchesStatus()
         map_by_branch = self.GetBranchesAction(map_by_branch)
-        # self.BranchesExecute(self.map_by_branch)
+        # self.BranchExecute(self.map_by_branch)
 
     """
     Метод создает структуру результатов проверок веток по всем 
