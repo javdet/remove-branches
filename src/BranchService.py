@@ -47,6 +47,7 @@ class BranchService(object):
 
         division = self.GetDivision(branch['displayId'])
         author = self.GetAuthor(branch)
+        print(branch)
         age = self.GetDiffTime(project['name'], repo['name'], branch)
         toref = self.CheckBranchMerge(
             project['key'], 
@@ -197,7 +198,7 @@ class BranchService(object):
         branch_item['action'] = "no"
         branch_result = self.GetBranchByConditionDeletion(branch_item)
         branch_result = self.GetBranchByConditionNotification(branch_item)
-        print(branch_result)
+        # print(branch_result)
         return branch_result
 
     def GetBranchByConditionDeletion(self, branch_item):
