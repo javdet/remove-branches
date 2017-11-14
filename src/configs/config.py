@@ -20,8 +20,8 @@ TODELETE = 0
 
 DELETE_CONDITIONS = [
     [
-        "isBranchValid",
-        "isBranchMerged",
+        "BranchValid",
+        "BranchMerged",
         "BranchDiff",
         "isTaskClosed"
     ],
@@ -33,12 +33,12 @@ DELETE_CONDITIONS = [
 
 NOTIFY_CONDITIONS = {
     "check": {
-        "isBranchMerged": 1,
+        "BranchMerged": 1,
         "isTaskClosed": 1,
         "isBranchOlder": 1
     },
     "invalid_name": {
-        "isBranchValid": 0
+        "BranchValid": 0
     }
 }
 

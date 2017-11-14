@@ -10,37 +10,43 @@ class BranchHandler(object):
         self.branch_service = BranchService()
         self.branch_execute = BranchExecute()
 
-    # Управляющий метод
     def Handle(self):
+        """
+        Управляющий метод
+        Выполняет 3 операции:
+        1. Получение структуру результатов проверок веток
+        2. Сравнения результатов с условиями и установка резолюций
+        3. Выполнение действий согласно резолюции
+        """
         map_by_branch = self.GetBranchesStatus()
         map_by_branch = self.GetBranchesAction(map_by_branch)
         # self.BranchExecute(self.map_by_branch)
 
-    """
-    Метод создает структуру результатов проверок веток по всем 
-    проектам и репозиториям
-    Возвращает структуру:
-    [
-        {
-            "project": 
-            "project_key":
-            "repo": 
-            "name":
-            "branch_id": 
-            "division": 
-            "author": 
-            "difference": 
-            "isBranchValid": 
-            "isBranchMerged": 
-            "noBranchDiff": 
-            "isTaskClosed": 
-            "noBranchDiffToDevelop": 
-            "isBranchOlder": 
-        },
-        {...}
-    ] 
-    """
     def GetBranchesStatus(self):
+        """
+        Метод создает структуру результатов проверок веток по всем 
+        проектам и репозиториям
+        :return:
+        [
+            {
+                "project": 
+                "project_key":
+                "repo": 
+                "name":
+                "branch_id": 
+                "division": 
+                "author": 
+                "difference": 
+                "BranchValid": 
+                "BranchMerged": 
+                "noBranchDiff": 
+                "isTaskClosed": 
+                "noBranchDiffToDevelop": 
+                "isBranchOlder": 
+            },
+            {...}
+        ] 
+        """
         bitbucket_repository = BitbucketRepository()
         projects = bitbucket_repository.GetProjectList()
         marked_branch_list = []
@@ -60,11 +66,12 @@ class BranchHandler(object):
 
         return marked_branch_list
                 
-    """
-    Метод создает структуру с указанием действий для каждой ветки
-    на основании сравнения с условиями
-    """
     def GetBranchesAction(self, map_by_branch):
+        """
+        Метод создает структуру с указанием действий для каждой ветки
+        на основании сравнения с условиями
+        :return:
+        """
         map_branch_by_condition = []
 
         for branch_item in map_by_branch:
@@ -73,6 +80,9 @@ class BranchHandler(object):
             )
             
     def BranchesExecute(self, marked_branch_list):
+        """
+        Метод производит действия согласно резолюциям
+        """
         pass
         # self.branch_execute.DeleteBranch(marked_branch_list)
         # self.branch_execute.SendEmail(marked_branch_list)

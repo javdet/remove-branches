@@ -13,6 +13,11 @@ class BitbucketRepository(object):
         )
 
     def GetProjectList(self):
+        """
+        Получение списка только тех проектов, 
+        по которым нужно вести поиск 
+        """
+
         projects = self.bitbucket.GetProjects()
         result_projects = []
         for project in projects['values']:
@@ -22,6 +27,11 @@ class BitbucketRepository(object):
         return result_projects
 
     def GetRepositoryList(self, project_key):
+        """
+        Получение списка только тех репозиториев,
+        по которым нужно вести поиск 
+        """
+
         repos = self.bitbucket.GetRepositories(project_key)
         result_repositories = []
         for repo in repos['values']:
@@ -31,6 +41,11 @@ class BitbucketRepository(object):
         return result_repositories
 
     def GetBranchList(self, project_key, repo_name):
+        """
+        Получение списка только тех веток,
+        по которым нужно вести поиск 
+        """
+        
         branches = self.bitbucket.GetBranches(project_key, repo_name)
         result_branches = []
         for branch in branches['values']:
