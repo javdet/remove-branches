@@ -27,19 +27,20 @@ DELETE_CONDITIONS = [
     ],
     [
         "BranchDiffToDevelop",
-        "isTaskClosed"
+        "ExistTargetBranch",
+        "BranchMerged"
     ]
 ]
 
 NOTIFY_CONDITIONS = {
-    "check": {
-        "BranchMerged": 1,
-        "isTaskClosed": 1,
-        "isBranchOlder": 1
-    },
-    "invalid_name": {
-        "BranchValid": 0
-    }
+    "check": [
+        "BranchMerged",
+        "isTaskClosed",
+        "isBranchOlder"
+    ],
+    "invalid_name": [
+        "BranchValid"
+    ]
 }
 
 BRANCH_NAME_TEMPLATE = "^(.*)/DIRI(\w+)-(\d+)$"

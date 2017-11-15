@@ -5,12 +5,12 @@ from src.BranchHandler import BranchHandler
 from src.lib.logger import Logger
 from src.configs import config
 
-"""
-Метод запускает процедуру проверки веток на соответствие
-условиям удаления/оповещения и выполнении действий
-Возвращает void
-"""
 def main():
+    """
+    Метод запускает процедуру проверки веток на соответствие
+    условиям удаления/оповещения и выполнении действий
+    Возвращает void
+    """
 
     logger = Logger(config.LOG_FILE)
     logger.Write("Start")

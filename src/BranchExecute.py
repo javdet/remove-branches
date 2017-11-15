@@ -24,25 +24,24 @@ class BranchExecute(object):
             """ % (project, repo, url, branch,  author)
         return content
 
-    # Удаление ветки
     def DeleteBranch(self, branch_marked_list):
+        """
+        Метод производит удаление веток с резолюцией delete
+        :return: void
+        """
+        
         bb = Bitbucket(
             config.BITBUCKET['rest'],
             config.BITBUCKET['user'],
             config.BITBUCKET['password'],
         )
         for branch_marked in branch_marked_list:
-            for condition in config.DELETE_CONDITIONS:
-                shared_items = set(condition.items()) & set(branch_marked.items())
-                if len(shared_items) == len(condition):
-                    bb.DeleteBranch(
-                        branch_marked['project_key'], 
-                        branch_marked['repo'], 
-                        branch_marked['name']
-                    )
-                    message = "%s %s %s Branch delete" % (project['name'], repo['name'], branch['displayId'])
-                    logger.Write(message)
-                    break
+            if branch_marked['action'] == "delete":
+                bb.DeleteBranch(
+                    branch_marked['project_key'], 
+                    branch_marked['repo'], 
+                    branch_marked['name']
+                )
 
     # Рассылка сообщений
     def SendEmail(self, branch_marked_list):

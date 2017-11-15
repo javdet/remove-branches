@@ -60,6 +60,7 @@ class BranchService(object):
             'develop'
         )
         difference = 1
+        exist_toref = 1
         if toref:
             difference = self.CompareBranch(
                 project, 
@@ -67,6 +68,9 @@ class BranchService(object):
                 branch,
                 toref
             )
+
+        if difference == 2:
+            exist_toref = 0
 
         result = {
             "project": project['name'],
@@ -76,10 +80,10 @@ class BranchService(object):
             "branch_id": branch['id'],
             "division": division,
             "author": author,
-            "difference": difference,
             "BranchValid": task,
             "BranchMerged": toref,
             "BranchDiff": difference,
+            "ExistTargetBranch": exist_toref,
             "isTaskClosed": task_status,
             "BranchDiffToDevelop": diff_develop,
             "isBranchOlder": age
@@ -171,11 +175,11 @@ class BranchService(object):
                 compare['errors'][0]['message']
             )
             self.logger.Write(message)
-            return 1
+            return 2
         if compare['size'] == 0:
             return(compare['size'])
-        else:
-            return 1
+        
+        return 1
 
     def GetDiffTime(self, project, repo, branch):
         """
@@ -204,6 +208,8 @@ class BranchService(object):
 
         branch_item['action'] = "no"
         branch_result = self.GetBranchByConditionDeletion(branch_item)
+        if branch_result == "delete":
+            return branch_result
         branch_result = self.GetBranchByConditionNotification(branch_item)
         return branch_result
 
@@ -250,5 +256,6 @@ class BranchService(object):
                 )
                 self.logger.Write(message)
                 branch_item['action'] = "notify"
+                branch_item['message'] = condition
                 break
         return branch_item
