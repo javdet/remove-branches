@@ -208,7 +208,7 @@ class BranchService(object):
 
         branch_item['action'] = "no"
         branch_result = self.GetBranchByConditionDeletion(branch_item)
-        if branch_result == "delete":
+        if branch_result['action'] == "delete":
             return branch_result
         branch_result = self.GetBranchByConditionNotification(branch_item)
         return branch_result
