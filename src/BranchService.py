@@ -14,7 +14,76 @@ class BranchService(object):
         self.division_template = re.compile(config.DIVISION_NAME_TEMPLATE)
         self.logger = Logger(config.LOG_FILE)
 
-    def GetMarkForBranch(self, project, repo, branch):
+    def GetDataForBranch(self, project, repo, branch):
+        """
+        Метод получает данные для ветки
+        :return:
+        {
+            "project": 
+            "project_key":
+            "repo": 
+            "name":
+            "task":
+            "branch_id": 
+            "division": 
+            "author": 
+            "target_branch":
+            "task_status":
+            "diff_to_target":
+            "diff_to_develop":
+            "age": 
+        }
+        """
+
+        self.bitbucket = Bitbucket(
+            config.BITBUCKET['rest'],
+            config.BITBUCKET['user'],
+            config.BITBUCKET['password']
+        )
+
+        task = self.GetTaskByBranchName(branch['displayId'])
+        jira = JiraRepository()
+        task_status = jira.GetTaskStatus(task)
+        division = self.GetDivision(branch['displayId'])
+        author = self.GetAuthor(branch)
+        age = self.GetDiffTime(project['name'], repo['name'], branch)
+        target_branch = self.CheckBranchMerge(
+            project['key'], 
+            repo['name'],
+            branch
+        )
+        diff_to_develop = self.CompareBranch(
+            project, 
+            repo,
+            branch,
+            'develop'
+        )
+        diff_to_target = self.CompareBranch(
+                project, 
+                repo,
+                branch,
+                toref
+        )
+
+        result = {
+            "project": project['name'],
+            "project_key": project['key'],
+            "repo": repo['name'],
+            "name": branch['displayId'],
+            "branch_id": branch['id'],
+            "task": task,
+            "division": division,
+            "author": author,
+            "target_branch": target_branch,
+            "task_status": task_status,
+            "diff_to_target": diff_to_target,
+            "diff_to_develop": diff_to_develop,
+            "age": age
+        }
+        print(result)
+        return result
+
+    def GetFlagsForBranch(self, branch):
         """
         Метод запускает проверки для ветки
         :return:
@@ -26,51 +95,39 @@ class BranchService(object):
             "branch_id": 
             "division": 
             "author": 
-            "difference": 
-            "BranchValid": 
-            "BranchMerged": 
+            "isBranchMerged": 
             "noBranchDiff": 
-            "isTaskClosed": 
             "noBranchDiffToDevelop": 
-            "isBranchOlder": 
+            "isTaskClosed": 
+            "noExistTargetBranch": 
+            "noBranchValid":
+            "isBranchOlder":
         }
         """
-        self.bitbucket = Bitbucket(
-            config.BITBUCKET['rest'],
-            config.BITBUCKET['user'],
-            config.BITBUCKET['password']
-        )
 
-        task = self.GetTaskByBranchName(branch['displayId'])
-        jira = JiraRepository()
-        task_status = jira.GetTaskStatus(task)
+        isBranchMerged = 0
+        noBranchDiff = 0
+        noBranchDiffToDevelop = 0
+        isTaskClosed = 0
+        noExistTargetBranch = 0
+        noBranchValid = 0
+        isBranchOlder = 0
+                
+        if branch['target_branch'] != -1:
+            isBranchMerged = 1
+        if branch['diff_to_target'] == 0:
+            noBranchDiff = 1
+        if branch['diff_to_develop'] == 0:
+            noBranchDiffToDevelop = 1
+        if branch['task_status'] == 6:
+            isTaskClosed = 1
+        if branch['task_status'] == -1:
+            noExistTargetBranch = -1
+        if branch['task'] == -1:
+            noBranchValid = 1
+        if branch['age'] > 30:
+            isBranchOlder = 1
 
-        division = self.GetDivision(branch['displayId'])
-        author = self.GetAuthor(branch)
-        age = self.GetDiffTime(project['name'], repo['name'], branch)
-        toref = self.CheckBranchMerge(
-            project['key'], 
-            repo['name'],
-            branch
-        )
-        diff_develop = self.CompareBranch(
-            project, 
-            repo,
-            branch,
-            'develop'
-        )
-        difference = 1
-        exist_toref = 1
-        if toref:
-            difference = self.CompareBranch(
-                project, 
-                repo,
-                branch,
-                toref
-            )
-
-        if difference == 2:
-            exist_toref = 0
 
         result = {
             "project": project['name'],
@@ -104,7 +161,7 @@ class BranchService(object):
             )
             return task_id
         else:
-            return 0
+            return -1
 
     def GetAuthor(self, branch):
         """
@@ -132,15 +189,13 @@ class BranchService(object):
     def CheckBranchMerge(self, project, repo, branch):
         """
         Проверка смержена ли ветка
-        :return: имя ветки назначение или 0
+        :return: имя ветки назначения или -1
         """
 
         if branch['metadata'].get('com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'):
             if branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'].get('pullRequest'):
                 if branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['state'] == "MERGED":
                     return branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['pullRequest']['toRef']['id']
-                else:
-                    return 0
             # Для случаев, когда мержилось несколько раз
             elif branch['metadata']['com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata']['merged']:
                 pr = self.bitbucket.GetPullRequests(
@@ -150,15 +205,13 @@ class BranchService(object):
                     'MERGED'
                 )
                 return pr['values'][0]['toRef']['id']
-            else:
-                return 0
-        else:
-            return 0
+            
+        return -1
 
     def CompareBranch(self, project, repo, branch, toref):
         """
         Сравнение веток
-        :return: 0 - нет изменений, 1 - есть
+        :return: 0 - нет изменений, >1 - есть, -1 - нет ветки
         """
 
         compare = self.bitbucket.CompareCommits(
@@ -175,16 +228,14 @@ class BranchService(object):
                 compare['errors'][0]['message']
             )
             self.logger.Write(message)
-            return 2
-        if compare['size'] == 0:
-            return(compare['size'])
+            return -1
         
-        return 1
+        return(compare['size'])
 
     def GetDiffTime(self, project, repo, branch):
         """
         Проверка старше ли ветка 30 дней
-        :return: 1 - да, 0 - нет
+        :return: число дней, -1 - не удалось определить
         """
 
         try:
@@ -194,11 +245,10 @@ class BranchService(object):
         except KeyError as e:
             message = "%s %s %s Key Error: %s" % (project, repo, branch['displayId'], str(e))
             self.logger.Write(message)
-            return 0
-        if tdiff.days > 30:
-            return 1
-        else:
-            return 0
+            return -1
+        
+        return tdiff.days
+
 
     def GetBranchByCondition(self, branch_item):
         """

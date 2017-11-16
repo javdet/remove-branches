@@ -14,15 +14,18 @@ class BranchHandler(object):
         """
         Управляющий метод
         Выполняет 3 операции:
-        1. Получение структуру результатов проверок веток
-        2. Сравнения результатов с условиями и установка резолюций
-        3. Выполнение действий согласно резолюции
+        1. Формирование структуры со списком необходимы данных по веткам
+        2. Формирование структуры с флагами проверок по веткам
+        3. Сравнения результатов с условиями и установка резолюций
+        4. Выполнение действий согласно резолюции
         """
-        map_by_branch = self.GetBranchesStatus()
+
+        info_by_branch = self.GetBranchesInfo()
+        flags_by_branch = self.GetBranchesFlags(info_by_branch)
         map_by_branch = self.GetBranchesAction(map_by_branch)
         # self.BranchExecute(self.map_by_branch)
 
-    def GetBranchesStatus(self):
+    def GetBranchesInfo(self):
         """
         Метод создает структуру результатов проверок веток по всем 
         проектам и репозиториям
@@ -34,19 +37,19 @@ class BranchHandler(object):
                 "repo": 
                 "name":
                 "branch_id": 
+                "task":
                 "division": 
                 "author": 
-                "difference": 
-                "BranchValid": 
-                "BranchMerged": 
-                "noBranchDiff": 
-                "isTaskClosed": 
-                "noBranchDiffToDevelop": 
-                "isBranchOlder": 
+                "target_branch":
+                "task_status":
+                "diff_to_target":
+                "diff_to_develop":
+                "age":  
             },
             {...}
         ] 
         """
+
         bitbucket_repository = BitbucketRepository()
         projects = bitbucket_repository.GetProjectList()
         marked_branch_list = []
@@ -60,12 +63,18 @@ class BranchHandler(object):
                     project['key'], repo['name']
                 )
                 for branch in branches:
-                    marked_branch_list.append(
-                        self.branch_service.GetMarkForBranch(project, repo, branch)
+                    branch_data_list.append(
+                        self.branch_service.GetDataForBranch(project, repo, branch)
                     )
 
-        return marked_branch_list
-                
+        return branch_data_list
+
+    def GetBranchesFlags(self, info_by_branch):
+        for branch in info_by_branch:
+            branch_flags_list.append(
+                self.branch_service.GetFlagsForBranch(branch)
+            )
+
     def GetBranchesAction(self, map_by_branch):
         """
         Метод создает структуру с указанием действий для каждой ветки

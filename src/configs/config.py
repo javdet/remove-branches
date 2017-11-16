@@ -26,6 +26,7 @@ DELETE_CONDITIONS = [
     ],
     [
         "ExistTargetBranch",
+        "isTaskClosed",
         "BranchMerged"
     ]
 ]
