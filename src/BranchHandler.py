@@ -23,7 +23,7 @@ class BranchHandler(object):
         info_by_branch = self.GetBranchesInfo()
         flags_by_branch = self.GetBranchesFlags(info_by_branch)
         actions_by_branch = self.GetBranchesAction(flags_by_branch)
-        # self.BranchExecute(actions_by_branch)
+        self.BranchExecute(actions_by_branch)
 
     def GetBranchesInfo(self):
         """
@@ -107,22 +107,48 @@ class BranchHandler(object):
         Метод создает структуру с указанием действий для каждой ветки
         на основании сравнения с условиями
         :return:
+        {
+            "delete": [
+                        {
+                            "project": 
+                            "project_key":
+                            "repo": 
+                            "name":
+                            "branch_id": 
+                            "division": 
+                            "author": 
+                        },
+                        {...}
+            ],
+            "notify": [
+                        {
+                            "project": 
+                            "project_key":
+                            "repo": 
+                            "name":
+                            "branch_id": 
+                            "division": 
+                            "author": 
+                            "message":
+                        },
+                        {...}
+            ]
+        }
         """
 
-        map_branch_by_condition = []
+        map_branch_for_condition = {}
+        map_branch_for_condition['delete'] = GetBranchForDeletion(map_by_branch)
+        map_branch_for_condition['notify'] = GetBranchForNotify(map_by_branch)     
 
-        for branch_item in map_by_branch:
-            map_branch_by_condition.append(
-                self.branch_service.GetBranchByCondition(branch_item)
-            )
+        return map_branch_for_condition
             
     def BranchesExecute(self, marked_branch_list):
         """
         Метод производит действия согласно резолюциям
+        :return: void
         """
-        pass
-        # self.branch_execute.DeleteBranch(marked_branch_list)
-        # self.branch_execute.SendEmail(marked_branch_list)
+        self.branch_execute.DeleteBranch(marked_branch_list['delete'])
+        # self.branch_execute.SendEmail(marked_branch_list['notify'])
     
     
 

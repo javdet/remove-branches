@@ -115,7 +115,7 @@ class BranchService(object):
         isBranchOlder = 0
         noTaskExist = 0
                 
-        if branch['target_branch'] != -1:
+        if branch['target_branch'] is not None:
             isBranchMerged = 1
         if branch['diff_to_target'] == 0:
             noBranchDiff = 1
@@ -123,11 +123,11 @@ class BranchService(object):
             noBranchDiffToDevelop = 1
         if branch['task_status'] == 6:
             isTaskClosed = 1
-        if branch['task_status'] == -1:
+        if branch['task_status'] == is not None:
             noTaskExist = 1
-        if branch['diff_to_target'] == -1:
+        if branch['diff_to_target'] == is not None:
             noExistTargetBranch = 1
-        if branch['task'] == -1:
+        if branch['task'] == is not None:
             noBranchValid = 1
         if branch['age'] > 30:
             isBranchOlder = 1
@@ -156,7 +156,7 @@ class BranchService(object):
     def GetTaskByBranchName(self, branch):
         """
         Проверка имени ветки на соответствие правилам
-        :return: ключ задачи или 0
+        :return: ключ задачи или None
         """
 
         if len(self.branch_template.findall(branch)) == 1:
@@ -166,7 +166,7 @@ class BranchService(object):
             )
             return task_id
         else:
-            return -1
+            return None
 
     def GetAuthor(self, branch):
         """
@@ -194,7 +194,7 @@ class BranchService(object):
     def CheckBranchMerge(self, project, repo, branch):
         """
         Проверка смержена ли ветка
-        :return: имя ветки назначения или -1
+        :return: имя ветки назначения или None
         """
 
         if branch['metadata'].get('com.atlassian.bitbucket.server.bitbucket-ref-metadata:outgoing-pull-request-metadata'):
@@ -211,12 +211,12 @@ class BranchService(object):
                 )
                 return pr['values'][0]['toRef']['id']
             
-        return -1
+        return None
 
     def CompareBranch(self, project, repo, branch, toref):
         """
         Сравнение веток
-        :return: 0 - нет изменений, >1 - есть, -1 - нет ветки
+        :return: 0 - нет изменений, >1 - есть, None - нет ветки
         """
 
         compare = self.bitbucket.CompareCommits(
@@ -233,14 +233,14 @@ class BranchService(object):
                 compare['errors'][0]['message']
             )
             self.logger.Write(message)
-            return -1
+            return None
         
         return(compare['size'])
 
     def GetDiffTime(self, project, repo, branch):
         """
         Проверка старше ли ветка 30 дней
-        :return: число дней, -1 - не удалось определить
+        :return: число дней, None - не удалось определить
         """
 
         try:
@@ -250,68 +250,147 @@ class BranchService(object):
         except KeyError as e:
             message = "%s %s %s Key Error: %s" % (project, repo, branch['displayId'], str(e))
             self.logger.Write(message)
-            return -1
+            return None
         
         return tdiff.days
 
-
-    def GetBranchByCondition(self, branch_item):
-        """
-        Сравнение с условиями и выставления флагов
-        :return:
-        """
-
-        branch_item['action'] = "no"
-        branch_result = self.GetBranchByConditionDeletion(branch_item)
-        if branch_result['action'] == "delete":
-            return branch_result
-        branch_result = self.GetBranchByConditionNotification(branch_item)
-        return branch_result
-
-    def GetBranchByConditionDeletion(self, branch_item):
+    def GetBranchForDeletion(self, map_by_branch):
         """
         Сравнение с условиями на удаление
+        возвращает только список веток для удаления
         :return:
+        [
+            {
+                "project": 
+                "project_key":
+                "repo": 
+                "name":
+                "branch_id": 
+                "division": 
+                "author": 
+            },
+            {...}
+        ]
         """
 
-        for condition in config.DELETE_CONDITIONS:
-            success_condition_count = 0
-            for condition_item in condition:
-                if branch_item[condition_item]:
-                    success_condition_count += 1
+        deletion_list = []
+        for branch_item in map_by_branch:
+            for condition in config.DELETE_CONDITIONS:
+                if is not None:
+                    deletion_list.append(
+                        CheckBranchConditionDeletion(branch_item, condition)
+                    )
+                    break
+        return deletion_list
 
-            if len(condition) == success_condition_count:
-                message = "%s %s %s Branch delete" % (
-                    branch_item['project'], 
-                    branch_item['repo'], 
-                    branch_item['name']
-                )
-                self.logger.Write(message)
-                branch_item['action'] = "delete"
-                break
-        return branch_item
-    
-    def GetBranchByConditionNotification(self, branch_item):
+    def CheckBranchConditionDeletion(self, branch_item, condition):
+        """
+        Возвращает параметры ветки для удаления
+        :return: none или
+        {
+            "project": 
+            "project_key":
+            "repo": 
+            "name":
+            "branch_id": 
+            "division": 
+            "author":
+        }
+        """
+
+        success_condition_count = 0
+        for condition_item in condition:
+            if branch_item[condition_item]:
+                success_condition_count += 1
+
+        if len(condition) == success_condition_count:
+            message = "%s %s %s Branch delete" % (
+                branch_item['project'], 
+                branch_item['repo'], 
+                branch_item['name']
+            )
+            self.logger.Write(message)
+            result = {
+                "project": branch_item['project'],
+                "project_key": branch_item['project_key'],
+                "repo": branch_item['repo'], 
+                "name": branch_item['name'],
+                "branch_id": branch_item['branch_id'],
+                "division": branch_item['division'],
+                "author": branch_item['author'],
+            }
+            return result
+        return None
+        
+    def GetBranchForNotify(self, map_by_branch):
         """
         Сравнение с условиями на оповещение
+        возвращает только список веток для оповещения
         :return:
+        [
+            {
+                "project": 
+                "project_key":
+                "repo": 
+                "name":
+                "branch_id": 
+                "division": 
+                "author":
+                "message":
+            },
+            {...}
+        ]
         """
 
-        for condition in config.NOTIFY_CONDITIONS:
-            success_condition_count = 0
-            for condition_item in config.NOTIFY_CONDITIONS[condition]:
-                if branch_item[condition_item]:
-                    success_condition_count += 1
+        notify_list = []
+        for branch_item in map_by_branch:
+            for condition in config.NOTIFY_CONDITIONS:
+                if is not None:
+                    deletion_list.append(
+                        CheckBranchConditionNotify(branch_item, condition)
+                    )
+                    break
 
-            if len(config.NOTIFY_CONDITIONS[condition]) == success_condition_count:
-                branch_item['action'] = "notify"
-                branch_item['message'] = condition
-                message = "%s %s %s Branch sendmail %s" % (
-                    branch_item['project'], 
-                    branch_item['repo'], 
-                    branch_item['name'],
-                    branch_item['message']
-                )
-                self.logger.Write(message)
-                break
-        return branch_item
+        return notify_list
+
+    def CheckBranchConditionNotify(self, branch_item, condition):
+        """
+        Возвращает параметры ветки для оповещения
+        :return: none или
+        {
+            "project": 
+            "project_key":
+            "repo": 
+            "name":
+            "branch_id": 
+            "division": 
+            "author":
+            "message":
+        }
+        """
+
+        success_condition_count = 0
+        for condition_item in config.NOTIFY_CONDITIONS[condition]:
+            if branch_item[condition_item]:
+                success_condition_count += 1
+
+        if len(config.NOTIFY_CONDITIONS[condition]) == success_condition_count:
+            message = "%s %s %s Branch sendmail %s" % (
+                branch_item['project'], 
+                branch_item['repo'], 
+                branch_item['name'],
+                branch_item['message']
+            )
+            self.logger.Write(message)
+            result = {
+                "project": branch_item['project'],
+                "project_key": branch_item['project_key'],
+                "repo": branch_item['repo'], 
+                "name": branch_item['name'],
+                "branch_id": branch_item['branch_id'],
+                "division": branch_item['division'],
+                "author": branch_item['author']
+                "message": condition
+            }
+            return result
+        return None
