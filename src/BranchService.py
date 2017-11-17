@@ -62,7 +62,7 @@ class BranchService(object):
                 project, 
                 repo,
                 branch,
-                toref
+                target_branch
         )
 
         result = {
@@ -102,6 +102,7 @@ class BranchService(object):
             "noExistTargetBranch": 
             "noBranchValid":
             "isBranchOlder":
+            "noTaskExist":
         }
         """
 
@@ -112,6 +113,7 @@ class BranchService(object):
         noExistTargetBranch = 0
         noBranchValid = 0
         isBranchOlder = 0
+        noTaskExist = 0
                 
         if branch['target_branch'] != -1:
             isBranchMerged = 1
@@ -122,7 +124,9 @@ class BranchService(object):
         if branch['task_status'] == 6:
             isTaskClosed = 1
         if branch['task_status'] == -1:
-            noExistTargetBranch = -1
+            noTaskExist = 1
+        if branch['diff_to_target'] == -1:
+            noExistTargetBranch = 1
         if branch['task'] == -1:
             noBranchValid = 1
         if branch['age'] > 30:
@@ -130,20 +134,21 @@ class BranchService(object):
 
 
         result = {
-            "project": project['name'],
-            "project_key": project['key'],
-            "repo": repo['name'],
-            "name": branch['displayId'],
-            "branch_id": branch['id'],
-            "division": division,
-            "author": author,
+            "project": branch['project'],
+            "project_key": branch['project_key'],
+            "repo": branch['repo'],
+            "name": branch['name'],
+            "branch_id": branch['branch_id'],
+            "division": branch['division'],
+            "author": branch['author'],
             "isBranchMerged": isBranchMerged,
             "noBranchDiff": noBranchDiff,
             "noBranchDiffToDevelop": noBranchDiffToDevelop,
             "isTaskClosed": isTaskClosed,
             "noExistTargetBranch": noExistTargetBranch,
             "noBranchValid": noBranchValid,
-            "isBranchOlder": isBranchOlder
+            "isBranchOlder": isBranchOlder,
+            "noTaskExist": noTaskExist
         }
         print(result)
         return result

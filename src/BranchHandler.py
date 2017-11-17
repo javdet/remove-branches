@@ -52,7 +52,7 @@ class BranchHandler(object):
 
         bitbucket_repository = BitbucketRepository()
         projects = bitbucket_repository.GetProjectList()
-        marked_branch_list = []
+        branch_data_list = []
 
         for project in projects:
             repos = bitbucket_repository.GetRepositoryList(
@@ -89,11 +89,13 @@ class BranchHandler(object):
                 "noExistTargetBranch": 
                 "noBranchValid":
                 "isBranchOlder":
+                "noTaskExist":
             },
             {...}
         ]
         """
 
+        branch_flags_list = []
         for branch in info_by_branch:
             branch_flags_list.append(
                 self.branch_service.GetFlagsForBranch(branch)

@@ -79,7 +79,9 @@ class BranchExecute(object):
             send_data_list = FormatingData(branch_marked_list)
             send_message_list = PreparingMessages(send_data_list)
             for send_message in send_message_list:
-                
+                pass
+
+        """                
         for key, value in msg.items():
             smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
             if key == "DIRI525":
@@ -90,3 +92,4 @@ class BranchExecute(object):
                 message = "No RCPT mail KEY %s" % key
                 logger.Write(message)
             smtp.close()
+        """
