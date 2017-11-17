@@ -276,7 +276,7 @@ class BranchService(object):
         deletion_list = []
         for branch_item in map_by_branch:
             for condition in config.DELETE_CONDITIONS:
-                delete_branch = CheckBranchConditionDeletion(
+                delete_branch = self.CheckBranchConditionDeletion(
                     branch_item, 
                     condition
                 )
@@ -350,7 +350,7 @@ class BranchService(object):
         notify_list = []
         for branch_item in map_by_branch:
             for condition in config.NOTIFY_CONDITIONS:
-                notify_branch = CheckBranchConditionNotify(
+                notify_branch = self.CheckBranchConditionNotify(
                     branch_item, 
                     condition
                 )
