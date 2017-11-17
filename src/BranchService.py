@@ -123,11 +123,11 @@ class BranchService(object):
             noBranchDiffToDevelop = 1
         if branch['task_status'] == 6:
             isTaskClosed = 1
-        if branch['task_status'] == is not None:
+        if branch['task_status'] is not None:
             noTaskExist = 1
-        if branch['diff_to_target'] == is not None:
+        if branch['diff_to_target'] is not None:
             noExistTargetBranch = 1
-        if branch['task'] == is not None:
+        if branch['task'] is not None:
             noBranchValid = 1
         if branch['age'] > 30:
             isBranchOlder = 1
@@ -276,11 +276,16 @@ class BranchService(object):
         deletion_list = []
         for branch_item in map_by_branch:
             for condition in config.DELETE_CONDITIONS:
-                if is not None:
+                delete_branch = CheckBranchConditionDeletion(
+                    branch_item, 
+                    condition
+                )
+                if delete_branch is not None:
                     deletion_list.append(
-                        CheckBranchConditionDeletion(branch_item, condition)
+                        delete_branch
                     )
                     break
+                
         return deletion_list
 
     def CheckBranchConditionDeletion(self, branch_item, condition):
@@ -345,9 +350,13 @@ class BranchService(object):
         notify_list = []
         for branch_item in map_by_branch:
             for condition in config.NOTIFY_CONDITIONS:
-                if is not None:
-                    deletion_list.append(
-                        CheckBranchConditionNotify(branch_item, condition)
+                notify_branch = CheckBranchConditionNotify(
+                    branch_item, 
+                    condition
+                )
+                if notify_branch is not None:
+                    notify_list.append(
+                        notify_branch    
                     )
                     break
 
