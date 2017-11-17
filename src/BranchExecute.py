@@ -107,7 +107,7 @@ background-color: #D3D3D3;
                 branch_marked['repo'], 
                 branch_marked['name']
             )
-            self.logger.Write(message)
+            logger.Write(message)
         """
             bitbucket.DeleteBranch(
                 branch_marked['project_key'], 
