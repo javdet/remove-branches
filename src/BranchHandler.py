@@ -137,8 +137,12 @@ class BranchHandler(object):
         """
 
         map_branch_for_condition = {}
-        map_branch_for_condition['delete'] = GetBranchForDeletion(map_by_branch)
-        map_branch_for_condition['notify'] = GetBranchForNotify(map_by_branch)     
+        map_branch_for_condition['delete'] = self.branch_service.GetBranchForDeletion(
+            map_by_branch
+        )
+        map_branch_for_condition['notify'] = self.branch_service.GetBranchForNotify(
+            map_by_branch
+        )     
 
         return map_branch_for_condition
             
