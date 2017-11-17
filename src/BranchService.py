@@ -85,7 +85,7 @@ class BranchService(object):
 
     def GetFlagsForBranch(self, branch):
         """
-        Метод запускает проверки для ветки
+        Метод запускает установку флагов для ветки
         :return:
         {
             "project": 
@@ -137,13 +137,13 @@ class BranchService(object):
             "branch_id": branch['id'],
             "division": division,
             "author": author,
-            "BranchValid": task,
-            "BranchMerged": toref,
-            "BranchDiff": difference,
-            "ExistTargetBranch": exist_toref,
-            "isTaskClosed": task_status,
-            "BranchDiffToDevelop": diff_develop,
-            "isBranchOlder": age
+            "isBranchMerged": isBranchMerged,
+            "noBranchDiff": noBranchDiff,
+            "noBranchDiffToDevelop": noBranchDiffToDevelop,
+            "isTaskClosed": isTaskClosed,
+            "noExistTargetBranch": noExistTargetBranch,
+            "noBranchValid": noBranchValid,
+            "isBranchOlder": isBranchOlder
         }
         print(result)
         return result
@@ -299,13 +299,14 @@ class BranchService(object):
                     success_condition_count += 1
 
             if len(config.NOTIFY_CONDITIONS[condition]) == success_condition_count:
-                message = "%s %s %s Branch sendmail" % (
-                    branch_item['project'], 
-                    branch_item['repo'], 
-                    branch_item['name']
-                )
-                self.logger.Write(message)
                 branch_item['action'] = "notify"
                 branch_item['message'] = condition
+                message = "%s %s %s Branch sendmail %s" % (
+                    branch_item['project'], 
+                    branch_item['repo'], 
+                    branch_item['name'],
+                    branch_item['message']
+                )
+                self.logger.Write(message)
                 break
         return branch_item

@@ -22,8 +22,8 @@ class BranchHandler(object):
 
         info_by_branch = self.GetBranchesInfo()
         flags_by_branch = self.GetBranchesFlags(info_by_branch)
-        map_by_branch = self.GetBranchesAction(map_by_branch)
-        # self.BranchExecute(self.map_by_branch)
+        actions_by_branch = self.GetBranchesAction(flags_by_branch)
+        # self.BranchExecute(actions_by_branch)
 
     def GetBranchesInfo(self):
         """
@@ -70,10 +70,35 @@ class BranchHandler(object):
         return branch_data_list
 
     def GetBranchesFlags(self, info_by_branch):
+        """
+        Метод получает структуру с флагами проверок по веткам
+        :return:
+        [
+            {
+                "project": 
+                "project_key":
+                "repo": 
+                "name":
+                "branch_id": 
+                "division": 
+                "author": 
+                "isBranchMerged": 
+                "noBranchDiff": 
+                "noBranchDiffToDevelop": 
+                "isTaskClosed": 
+                "noExistTargetBranch": 
+                "noBranchValid":
+                "isBranchOlder":
+            },
+            {...}
+        ]
+        """
+
         for branch in info_by_branch:
             branch_flags_list.append(
                 self.branch_service.GetFlagsForBranch(branch)
             )
+        return branch_flags_list
 
     def GetBranchesAction(self, map_by_branch):
         """
@@ -81,6 +106,7 @@ class BranchHandler(object):
         на основании сравнения с условиями
         :return:
         """
+
         map_branch_by_condition = []
 
         for branch_item in map_by_branch:

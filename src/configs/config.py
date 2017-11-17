@@ -20,25 +20,39 @@ TODELETE = 0
 
 DELETE_CONDITIONS = [
     [
-        "BranchValid",
-        "BranchMerged",
+        "isBranchMerged",
+        "noBranchDiff",
         "isTaskClosed"
     ],
     [
-        "ExistTargetBranch",
         "isTaskClosed",
-        "BranchMerged"
+        "isBranchMerged",
+        "noExistTargetBranch",
+        "noBranchDiffToDevelop"
+    ],
+    [
+        "noTaskExist",
+        "isBranchMerged",
+        "noExistTargetBranch",
+        "noBranchDiffToDevelop"
+    ],
+    [
+        "noBranchValid",
+        "isBranchMerged",
+        "noExistTargetBranch",
+        "noBranchDiffToDevelop"
     ]
 ]
 
 NOTIFY_CONDITIONS = {
     "check": [
-        "BranchMerged",
+        "isBranchMerged",
         "isTaskClosed",
         "isBranchOlder"
     ],
     "invalid_name": [
-        "BranchValid"
+        "isBranchMerged",
+        "noExistTargetBranch"
     ]
 }
 
