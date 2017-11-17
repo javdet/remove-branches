@@ -388,7 +388,7 @@ class BranchService(object):
                 branch_item['project'], 
                 branch_item['repo'], 
                 branch_item['name'],
-                branch_item['message']
+                condition
             )
             self.logger.Write(message)
             result = {
