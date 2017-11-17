@@ -285,7 +285,7 @@ class BranchService(object):
                         delete_branch
                     )
                     break
-                
+
         return deletion_list
 
     def CheckBranchConditionDeletion(self, branch_item, condition):
@@ -322,7 +322,7 @@ class BranchService(object):
                 "name": branch_item['name'],
                 "branch_id": branch_item['branch_id'],
                 "division": branch_item['division'],
-                "author": branch_item['author'],
+                "author": branch_item['author']
             }
             return result
         return None
@@ -398,7 +398,7 @@ class BranchService(object):
                 "name": branch_item['name'],
                 "branch_id": branch_item['branch_id'],
                 "division": branch_item['division'],
-                "author": branch_item['author']
+                "author": branch_item['author'],
                 "message": condition
             }
             return result
