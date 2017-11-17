@@ -23,7 +23,7 @@ class BranchHandler(object):
         info_by_branch = self.GetBranchesInfo()
         flags_by_branch = self.GetBranchesFlags(info_by_branch)
         actions_by_branch = self.GetBranchesAction(flags_by_branch)
-        self.BranchExecute(actions_by_branch)
+        self.BranchesExecute(actions_by_branch)
 
     def GetBranchesInfo(self):
         """
