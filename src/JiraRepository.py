@@ -19,7 +19,7 @@ class JiraRepository(object):
         :return: "статус задачи", None - нет задачи
         """
         
-        if task != 0:
+        if task is not None:
             issue = self.jira.GetIssue(task)
             if issue.get('errorMessages'):
                 message = "%s Error: %s" % (task, str(issue['errorMessages']))
