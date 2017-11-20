@@ -80,7 +80,6 @@ class BranchService(object):
             "diff_to_develop": diff_to_develop,
             "age": age
         }
-        print(result)
         return result
 
     def GetFlagsForBranch(self, branch):
@@ -150,7 +149,6 @@ class BranchService(object):
             "isBranchOlder": isBranchOlder,
             "noTaskExist": noTaskExist
         }
-        print(result)
         return result
 
     def GetTaskByBranchName(self, branch):

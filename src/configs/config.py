@@ -51,6 +51,7 @@ NOTIFY_CONDITIONS = {
         "isBranchOlder"
     ],
     "invalid_name": [
+        "noBranchValid",
         "isBranchMerged",
         "noExistTargetBranch"
     ]
