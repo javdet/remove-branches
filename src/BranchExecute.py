@@ -149,7 +149,11 @@ background-color: #D3D3D3;
             send_data_list = FormatingData(condition, branch_marked_list)
             send_message_list = PreparingMessages(condition, send_data_list)
             for division in send_message_list:
-                smtp.Send(config.MAIL['test'], send_message_list[division][0], send_message_list[division][1])
+                smtp.Send(
+                    config.MAIL['test'], 
+                    send_message_list[division][0], 
+                    send_message_list[division][1]
+                )
 
         smtp.close()
                 

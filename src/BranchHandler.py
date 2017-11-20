@@ -151,8 +151,9 @@ class BranchHandler(object):
         Метод производит действия согласно резолюциям
         :return: void
         """
+        
         self.branch_execute.DeleteBranch(marked_branch_list['delete'])
-        # self.branch_execute.SendEmail(marked_branch_list['notify'])
+        self.branch_execute.SendEmail(marked_branch_list['notify'])
     
     
 
