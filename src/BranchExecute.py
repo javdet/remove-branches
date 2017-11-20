@@ -37,10 +37,11 @@ class BranchExecute(object):
                             branch['name'],  
                             branch['author']
                         )
+                division = branch['division']
                 try:
-                    branch_data_list[branch.division] += content
+                    branch_data_list[division] += content
                 except KeyError:
-                    branch_data_list[branch.division] = content
+                    branch_data_list[division] = content
 
         return branch_data_list
 
