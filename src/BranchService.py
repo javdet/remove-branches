@@ -284,7 +284,7 @@ class BranchService(object):
                     deletion_list.append(
                         delete_branch
                     )
-                    del map_by_branch[branch_item]
+                    map_by_branch.remove(branch_item)
                     break
 
         return deletion_list, map_by_branch
