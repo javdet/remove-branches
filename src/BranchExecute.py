@@ -129,13 +129,13 @@ background-color: #D3D3D3;
                 branch_marked['name']
             )
             logger.Write(message)
-        """
+        
             bitbucket.DeleteBranch(
                 branch_marked['project_key'], 
                 branch_marked['repo'], 
                 branch_marked['name']
             )
-        """
+        
 
 
     def SendEmail(self, branch_marked_list):
@@ -152,7 +152,7 @@ background-color: #D3D3D3;
             for division in send_message_list:
                 smtp.Send(
                     config.MAIL['fromaddr'],
-                    config.MAIL['test'], 
+                    config.MAIL[division], 
                     send_message_list[division][0], 
                     send_message_list[division][1]
                 )

@@ -15,9 +15,19 @@ JIRA = {
     "password": "HDgbf67sgwk"
 }
 
-# 1 - удалять, 0 - только оповещать
-TODELETE = 0
-
+"""
+Список условий для удаления. Условия в одном списке 
+объеденины в логическое И, в разных - ИЛИ
+Возможные условаия:
+isBranchMerged - ветка находиться в статусе Merged
+noBranchDiff - нет новых коммитов относительно ветки назначения
+isTaskClosed - задача в КСУ с кодом ветки находиться в статусе Закрыта
+noExistTargetBranch - не существует ветки назначения
+noBranchDiffToDevelop - нет новых коммитов относительно ветки develop
+noTaskExist - задачи в КСУ с кодом ветки не существует
+noBranchValid - ветка не соответствует правилам именования
+isBranchOlder - ветка существует более месяца
+"""
 DELETE_CONDITIONS = [
     [
         "isBranchMerged",
@@ -51,19 +61,19 @@ NOTIFY_CONDITIONS = {
         "isBranchOlder"
     ],
     "invalid_name": [
-        "noBranchValid",
-        "isBranchMerged",
-        "noExistTargetBranch"
+        "noBranchValid"
     ]
 }
 
 BRANCH_NAME_TEMPLATE = "^(.*)/DIRI(\w+)-(\d+)$"
 DIVISION_NAME_TEMPLATE = "^(.*)/DIRI(\d+)-(\d+)$"
 
-# Параметры отправки сообщений. fromaddr и smtp обязательные параметры.
-# fromaddr - Адрес отправителя
-# smtp - адрес SMTP сервера
-# Остальные параметры относятся к адресам получателей
+"""
+Параметры отправки сообщений. fromaddr и smtp обязательные параметры.
+fromaddr - Адрес отправителя
+smtp - адрес SMTP сервера
+Остальные параметры относятся к адресам получателей
+"""
 MAIL = {
     "fromaddr": "noreply@stash.itmh.ru",
     "smtp": "mail.sis.mirasystem.net",
@@ -77,7 +87,6 @@ MAIL = {
     "DIRI532": "DIR.I5.3.2.users@itmh.ru",
     "test": "byvshev.sergey@itmh.ru"
 }
-
 
 # Указать тот же путь в файле ротации
 LOG_FILE = "/var/log/rmbranch.log"
