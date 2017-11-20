@@ -284,9 +284,10 @@ class BranchService(object):
                     deletion_list.append(
                         delete_branch
                     )
+                    del map_by_branch[branch_item]
                     break
 
-        return deletion_list
+        return deletion_list, map_by_branch
 
     def CheckBranchConditionDeletion(self, branch_item, condition):
         """

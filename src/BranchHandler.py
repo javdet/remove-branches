@@ -13,7 +13,7 @@ class BranchHandler(object):
     def Handle(self):
         """
         Управляющий метод
-        Выполняет 3 операции:
+        Выполняет 4 операции:
         1. Формирование структуры со списком необходимы данных по веткам
         2. Формирование структуры с флагами проверок по веткам
         3. Сравнения результатов с условиями и установка резолюций
@@ -137,7 +137,7 @@ class BranchHandler(object):
         """
 
         map_branch_for_condition = {}
-        map_branch_for_condition['delete'] = self.branch_service.GetBranchForDeletion(
+        map_branch_for_condition['delete'], map_by_branch = self.branch_service.GetBranchForDeletion(
             map_by_branch
         )
         map_branch_for_condition['notify'] = self.branch_service.GetBranchForNotify(

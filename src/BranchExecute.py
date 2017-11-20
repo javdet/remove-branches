@@ -7,57 +7,63 @@ from .lib.logger import Logger
 
 class BranchExecute(object):
 
-    def FormatingData(self, branch_list):
+    def FormatingData(self, condition, branch_list):
         """
         Форматирование данных ввиде строки html таблицы
-        :return: html-строка
+        :return: dict
+        { отдел: html список веток }
         """
 
+        branch_data_list = {}
         for branch in branch_list:
-            url = "%s/projects/%s/repos/%s/browse?at=%s" % (
-                config.Bitbucket['ui'], 
-                branch['project_key'],
-                branch['repo'],
-                branch['branch_id']
-            )
-            content = """
-                <tr>
-                    <td>%s</td>
-                    <td>%s</td>
-                    <td><a href="%s">%s</a></td>
-                    <td>%s</td>
-                </tr>
-                """ % (
-                        branch['project'],
-                        branch['repo'], 
-                        url, 
-                        branch['name'],  
-                        branch['author']
-                    )
-            try:
-                branch_data_list[branch.division] += content
-            except KeyError:
-                branch_data_list[branch.division] = content
+            if branch['message'] == condition:
+                url = "%s/projects/%s/repos/%s/browse?at=%s" % (
+                    config.Bitbucket['ui'], 
+                    branch['project_key'],
+                    branch['repo'],
+                    branch['branch_id']
+                )
+                content = """
+                    <tr>
+                        <td>%s</td>
+                        <td>%s</td>
+                        <td><a href="%s">%s</a></td>
+                        <td>%s</td>
+                    </tr>
+                    """ % (
+                            branch['project'],
+                            branch['repo'], 
+                            url, 
+                            branch['name'],  
+                            branch['author']
+                        )
+                try:
+                    branch_data_list[branch.division] += content
+                except KeyError:
+                    branch_data_list[branch.division] = content
 
         return branch_data_list
 
-    def PreparingMessages(self, message_type, data_list):
+    def PreparingMessages(self, condition, data_list):
         """
         Метод формирует тело сообщения
-        :return: тело сообщения
+        :return: dict
+        {отдел, [заголовок, сообщение]}
         """
 
-        if condition == "delete":
-            subject = "Список веток для удаления %s" % data_list['division']
-            message = "Ветки, которые будут удалены автоматически"
-        elif condition == "check":
-            subject = "Список веток для проверки %s" % data_list['division']
-            message = "Просьба проверить нужны ли ветки и при необходимости удалить" 
-        elif condition == "invalid_name":
-            subject = "Список веток с некорректным имененем %s" % data_list['division']
-            message = "Следующие ветки имеют некорректное название" 
-        
-        body = """
+        message_data_list = {}
+        for division in data_list:
+            if condition == "delete":
+                subject = "Список веток для удаления %s" % division
+                message = "Ветки, которые будут удалены автоматически"
+            elif condition == "check":
+                subject = "Список веток для проверки %s" % division
+                message = "Просьба проверить нужны ли ветки и при необходимости удалить" 
+            elif condition == "invalid_name":
+                subject = "Список веток с некорректным имененем %s" % division
+                message = "Следующие ветки имеют некорректное название" 
+            
+            body = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -86,7 +92,21 @@ background-color: #D3D3D3;
 </table>
 </body>
 </html>
-""" % (subject, message, content)
+""" % (subject, message, data_list[division])
+
+    try:
+        message_data_list[division] += [
+            subject,
+            body
+        ]
+    except KeyError:
+        message_data_list[division] = [
+            subject,
+            body
+        ]
+
+    return message_data_list
+
 
     def DeleteBranch(self, branch_marked_list):
         """
@@ -123,21 +143,13 @@ background-color: #D3D3D3;
         и инициирует рассылку
         :return: void
         """
-        for condition in config.NOTIFY_CONDITIONS:
-            send_data_list = FormatingData(branch_marked_list)
-            send_message_list = PreparingMessages(condition, send_data_list)
-            for send_message in send_message_list:
-                pass
 
-        """                
-        for key, value in msg.items():
-            smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
-            if key == "DIRI525":
-                smtp.Send(msg_type, config.MAIL[key], value, key.encode('utf-8'))
-            elif key in config.MAIL:
-                smtp.Send(msg_type, "%s, %s" % (config.MAIL[key], config.MAIL['DIRI525']), value, key.encode('utf-8'))
-            else:
-                message = "No RCPT mail KEY %s" % key
-                logger.Write(message)
-            smtp.close()
-        """
+        smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
+        for condition in config.NOTIFY_CONDITIONS:
+            send_data_list = FormatingData(condition, branch_marked_list)
+            send_message_list = PreparingMessages(condition, send_data_list)
+            for division in send_message_list:
+                smtp.Send(config.MAIL['test'], send_message_list[division][0], send_message_list[division][1])
+
+        smtp.close()
+                

@@ -13,50 +13,16 @@ class Mail:
         self.msg = MIMEMultipart()
         self.msg['From'] = fromaddr
 
-# Отправка сообщения
-    def Send(self, msg_type, toaddr, content, division):
-        if msg_type == "delete":
-            self.msg['Subject'] = Header("Список веток для удаления %s" % division, 'utf-8')
-            message = "Ветки, которые будут удалены автоматически"
-        elif msg_type == "check":
-            self.msg['Subject'] = Header("Список веток для проверки %s" % division, 'utf-8')
-            message = "Просьба проверить нужны ли ветки и при необходимости удалить" 
-        elif msg_type == "invalid_name":
-            self.msg['Subject'] = Header("Список веток с некорректным имененем %s" % division, 'utf-8')
-            message = "Следующие ветки имеют некорректное название" 
-        
+    def Send(self, toaddr, subject, content):
+        """
+        Отправка сообщения указанному адресату
+        :return: код ошибки отправки или void
+        """
+
+        self.msg['Subject'] = Header(subject, 'utf-8')
         self.msg['To'] = toaddr
-        body = """
-<!DOCTYPE html>
-<html>
-<head>
-<title>%s</title>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
-<style type="text/css">
-body{
-font-size: 12px;
-}
-th {
-background-color: #D3D3D3;
-}
-</style>
-</head>
-<body>
-%s
-<table>
-<tr>
-<th>Проект</th>
-<th>Репозиторий</th>
-<th>Ветка</th>
-<th>Автор</th>
-</tr>
-%s
-</table>
-</body>
-</html>
-""" % (self.msg['Subject'], message, content)
-        part = MIMEText(body, 'html', 'utf-8')
+        
+        part = MIMEText(content, 'html', 'utf-8')
         self.msg.attach(part)
         try:
             self.smtp.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
