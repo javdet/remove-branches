@@ -146,8 +146,8 @@ background-color: #D3D3D3;
 
         smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
         for condition in config.NOTIFY_CONDITIONS:
-            send_data_list = FormatingData(condition, branch_marked_list)
-            send_message_list = PreparingMessages(condition, send_data_list)
+            send_data_list = self.FormatingData(condition, branch_marked_list)
+            send_message_list = self.PreparingMessages(condition, send_data_list)
             for division in send_message_list:
                 smtp.Send(
                     config.MAIL['test'], 
