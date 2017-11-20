@@ -18,7 +18,7 @@ class BranchExecute(object):
         for branch in branch_list:
             if branch['message'] == condition:
                 url = "%s/projects/%s/repos/%s/browse?at=%s" % (
-                    config.Bitbucket['ui'], 
+                    config.BITBUCKET['ui'], 
                     branch['project_key'],
                     branch['repo'],
                     branch['branch_id']
