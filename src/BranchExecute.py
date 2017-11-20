@@ -145,17 +145,19 @@ background-color: #D3D3D3;
         :return: void
         """
 
+        smtp = Mail(config.MAIL['smtp'])
         for condition in config.NOTIFY_CONDITIONS:
             send_data_list = self.FormatingData(condition, branch_marked_list)
             send_message_list = self.PreparingMessages(condition, send_data_list)
             for division in send_message_list:
-                smtp = Mail(config.MAIL['smtp'], config.MAIL['fromaddr'])
                 smtp.Send(
+                    config.MAIL['fromaddr'],
                     config.MAIL['test'], 
                     send_message_list[division][0], 
                     send_message_list[division][1]
                 )
-                smtp.close()
+                
+        smtp.close()
 
         
                 
