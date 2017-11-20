@@ -94,18 +94,18 @@ background-color: #D3D3D3;
 </html>
 """ % (subject, message, data_list[division])
 
-    try:
-        message_data_list[division] += [
-            subject,
-            body
-        ]
-    except KeyError:
-        message_data_list[division] = [
-            subject,
-            body
-        ]
+            try:
+                message_data_list[division] += [
+                    subject,
+                    body
+                ]
+            except KeyError:
+                message_data_list[division] = [
+                    subject,
+                    body
+                ]
 
-    return message_data_list
+        return message_data_list
 
 
     def DeleteBranch(self, branch_marked_list):
