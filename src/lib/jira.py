@@ -1,10 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import json
 import requests
 
-class Jira:
+class Jira(object):
 
     def __init__(self, base_url, login, password):
         self.auth = (login, password)

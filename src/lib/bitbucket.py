@@ -1,46 +1,57 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import json
 import requests
 
 
-class Bitbucket:
+class Bitbucket(object):
 
     def __init__(self, base_url, login, password):
         self.auth = (login, password)
         self.base_url = base_url
         self.headers = {
                         'Content-Type': 'application/json'
-        }
+    }
 
-# Получить список проектов
     def GetProjects(self):
+        """
+        Метод возвращает список проектов в bitbucket
+        """
+
         url = "%s/api/1.0/projects" % self.base_url
         resp = requests.get(url, auth=self.auth, headers=self.headers)
         self.data = json.loads(resp.text)
         return self.data
 
-# Получить список репозиториев в проекте	
     def GetRepositories(self, projectkey):
+        """
+        Метод возвращает список репозиториев в проекте
+        """
+
         url = "%s/api/1.0/projects/%s/repos" % (self.base_url, projectkey)
         resp = requests.get(url, auth=self.auth, headers=self.headers)
         self.data = json.loads(resp.text)
         return self.data
 
-# Получить список веток
     def GetBranches(self, projectkey, reponame):
+        """
+        Метод возвращает список веток в репозитории
+        """
+
         url = "%s/api/1.0/projects/%s/repos/%s/branches" % (self.base_url, projectkey, reponame)
         parameters = dict(
             details='true',
-            limit=400
+            limit=100
         )
         resp = requests.get(url, auth=self.auth, params=parameters, headers=self.headers)
         self.data = json.loads(resp.text)
         return self.data
 
-# Получить данные по одной ветке
     def GetBranch(self, projectkey, reponame, branchname):
+        """
+        Метод возвращает данные по одной конкретной ветке
+        """
+
         url = "%s/api/1.0/projects/%s/repos/%s/branches" % (self.base_url, projectkey, reponame)
         parameters = dict(
             details='true',
@@ -50,8 +61,12 @@ class Bitbucket:
         self.data = json.loads(resp.text)
         return self.data
 
-# Получить список PR
+
     def GetPullRequests(self, projectkey, reponame, branchid, state):
+        """
+        Метод возвращает данные по PR
+        """
+
         url = "%s/api/1.0/projects/%s/repos/%s/pull-requests" % (self.base_url, projectkey, reponame)
         parameters = dict(
             direction='OUTGOING',
@@ -62,8 +77,11 @@ class Bitbucket:
         self.data = json.loads(resp.text)
         return self.data
 
-# Сравнение веток
     def CompareCommits(self, projectkey, reponame, frombranchid, tobranchid):
+        """
+        Метод возвращает результат сравнения двух веток
+        """
+
         url = "%s/api/1.0/projects/%s/repos/%s/compare/commits" % (self.base_url, projectkey, reponame)
         parameters = {
             'from': frombranchid,
@@ -73,8 +91,11 @@ class Bitbucket:
         self.data = json.loads(resp.text)
         return self.data
 
-# Удаление ветки
     def DeleteBranch(self, projectkey, reponame, branchid):
+        """
+        Метод производит удаление ветки
+        """
+
         url = "%s/branch-utils/1.0/projects/%s/repos/%s/branches" % (self.base_url, projectkey, reponame)
         parameters = dict (
             name=branchid,
