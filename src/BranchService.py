@@ -126,7 +126,7 @@ class BranchService(object):
             noTaskExist = 1
         if branch['diff_to_target'] is not None:
             noExistTargetBranch = 1
-        if branch['task'] is not None:
+        if branch['task'] is None:
             noBranchValid = 1
         if branch['age'] > 30:
             isBranchOlder = 1

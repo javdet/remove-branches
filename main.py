@@ -15,8 +15,8 @@ def main():
     logger = Logger(config.LOG_FILE)
     logger.Write("Start")
 
-    bh = BranchHandler()
-    bh.Handle()
+    branch_handler = BranchHandler()
+    branch_handler.Handle()
 
     logger.Write("Stop")
     logger.Close()
